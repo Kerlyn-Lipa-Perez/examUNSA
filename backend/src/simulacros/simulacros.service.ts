@@ -1,0 +1,85 @@
+import { Injectable, Inject, ForbiddenException } from '@nestjs/common';
+import { NodePgDatabase } from 'drizzle-orm/node-postgres';
+import { eq, desc, sql } from 'drizzle-orm';
+import { DATABASE_CONNECTION } from '../database/database.provider';
+import * as schema from '../database/schema';
+import { AiService } from '../ai/ai.service';
+import { GenerarSimulacroDto } from './dto/generar-simulacro.dto';
+import { GuardarResultadoDto } from './dto/guardar-resultado.dto';
+
+@Injectable()
+export class SimulacrosService {
+  constructor(
+    @Inject(DATABASE_CONNECTION) private db: NodePgDatabase<typeof schema>,
+    private aiService: AiService,
+  ) {}
+
+  async generar(userId: string, dto: GenerarSimulacroDto) {
+    const user = await this.db.query.users.findFirst({
+      where: eq(schema.users.id, userId),
+    });
+
+    if (!user) throw new ForbiddenException('Usuario no encontrado');
+
+    if (user.plan === 'free' && user.simulacrosHoy >= 3) {
+      throw new ForbiddenException('Has alcanzado el límite diario de 3 simulacros del plan Free. ¡Mejora a Pro para simulacros ilimitados!');
+    }
+
+    const preguntas = await this.aiService.generarPreguntas(dto.materia, 20);
+
+    // Incrementar simulacrosHoy atómicamente si es plan free (o general para estadísticas)
+    await this.db
+      .update(schema.users)
+      .set({ simulacrosHoy: sql`${schema.users.simulacrosHoy} + 1` })
+      .where(eq(schema.users.id, userId));
+
+    return {
+      materia: dto.materia,
+      preguntas,
+      tiempoMinutos: 30, // Tiempo sugerido
+    };
+  }
+
+  async guardarResultado(userId: string, dto: GuardarResultadoDto) {
+    const [resultado] = await this.db
+      .insert(schema.simulacroResults)
+      .values({
+        userId,
+        materia: dto.materia,
+        puntaje: dto.puntaje,
+        totalPreguntas: dto.respuestas.length,
+        respuestas: dto.respuestas,
+      })
+      .returning();
+
+    return {
+      guardado: true,
+      puntaje: resultado.puntaje,
+    };
+  }
+
+  async historial(userId: string) {
+    const user = await this.db.query.users.findFirst({
+      where: eq(schema.users.id, userId),
+    });
+
+    if (!user) throw new ForbiddenException('Usuario no encontrado');
+
+    const limit = user.plan === 'free' ? 1 : 20; // Free solo ve el último, Pro ve 20
+
+    const historial = await this.db
+      .select({
+        id: schema.simulacroResults.id,
+        materia: schema.simulacroResults.materia,
+        puntaje: schema.simulacroResults.puntaje,
+        totalPreguntas: schema.simulacroResults.totalPreguntas,
+        createdAt: schema.simulacroResults.createdAt,
+      })
+      .from(schema.simulacroResults)
+      .where(eq(schema.simulacroResults.userId, userId))
+      .orderBy(desc(schema.simulacroResults.createdAt))
+      .limit(limit);
+
+    return historial;
+  }
+}
