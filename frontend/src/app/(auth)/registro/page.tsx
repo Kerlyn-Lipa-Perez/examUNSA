@@ -1,6 +1,50 @@
+"use client";
 import Link from 'next/link';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Cookies from 'js-cookie';
 
 export default function RegisterPage() {
+  const router = useRouter();
+  const [nombre, setNombre] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+      const res = await fetch(`${apiUrl}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre, email, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || 'Error en el registro');
+      }
+
+      if (data.access_token) {
+        Cookies.set('access_token', data.access_token, { expires: 30 });
+        router.push('/dashboard');
+      } else {
+        router.push('/login');
+      }
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="bg-neutral-900 text-white min-h-screen flex flex-col font-sans relative overflow-hidden">
       {/* Background Ambience */}
@@ -39,12 +83,22 @@ export default function RegisterPage() {
               <p className="text-gray-400 text-sm font-light">Comienza tu camino hacia la vacante hoy.</p>
             </div>
             
-            <form className="space-y-6">
+            {error && <div className="mb-4 text-red-500 text-sm bg-red-900/20 p-3 rounded">{error}</div>}
+
+            <form className="space-y-6" onSubmit={handleSubmit}>
               {/* Nombre Completo */}
               <div className="space-y-1">
                 <label className="font-mono text-[11px] uppercase tracking-widest text-gray-500" htmlFor="name">Nombre Completo</label>
                 <div className="relative">
-                  <input className="w-full bg-transparent border-b-2 border-neutral-border focus:border-primary focus:ring-0 px-0 py-3 text-white placeholder-gray-600 outline-none transition-all duration-300" id="name" placeholder="Ej. Mario Vargas Llosa" type="text"/>
+                  <input 
+                    className="w-full bg-transparent border-b-2 border-neutral-border focus:border-primary focus:ring-0 px-0 py-3 text-white placeholder-gray-600 outline-none transition-all duration-300" 
+                    id="name" 
+                    placeholder="Ej. Mario Vargas Llosa" 
+                    type="text"
+                    value={nombre}
+                    onChange={(e) => setNombre(e.target.value)}
+                    required
+                  />
                 </div>
               </div>
               
@@ -52,7 +106,15 @@ export default function RegisterPage() {
               <div className="space-y-1">
                 <label className="font-mono text-[11px] uppercase tracking-widest text-gray-500" htmlFor="email">Email</label>
                 <div className="relative">
-                  <input className="w-full bg-transparent border-b-2 border-neutral-border focus:border-primary focus:ring-0 px-0 py-3 text-white placeholder-gray-600 outline-none transition-all duration-300" id="email" placeholder="estudiante@unsa.edu.pe" type="email"/>
+                  <input 
+                    className="w-full bg-transparent border-b-2 border-neutral-border focus:border-primary focus:ring-0 px-0 py-3 text-white placeholder-gray-600 outline-none transition-all duration-300" 
+                    id="email" 
+                    placeholder="estudiante@unsa.edu.pe" 
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
                 </div>
               </div>
               
@@ -60,7 +122,14 @@ export default function RegisterPage() {
               <div className="space-y-1">
                 <label className="font-mono text-[11px] uppercase tracking-widest text-gray-500" htmlFor="phone">Celular</label>
                 <div className="relative">
-                  <input className="w-full bg-transparent border-b-2 border-neutral-border focus:border-primary focus:ring-0 px-0 py-3 text-white placeholder-gray-600 outline-none transition-all duration-300" id="phone" placeholder="987 654 321" type="tel"/>
+                  <input 
+                    className="font-mono w-full bg-transparent border-b-2 border-neutral-border focus:border-primary focus:ring-0 px-0 py-3 text-white placeholder-gray-600 outline-none transition-all duration-300" 
+                    id="phone" 
+                    placeholder="987 654 321" 
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                  />
                 </div>
               </div>
               
@@ -68,23 +137,32 @@ export default function RegisterPage() {
               <div className="space-y-1">
                 <label className="font-mono text-[11px] uppercase tracking-widest text-gray-500" htmlFor="password">Contraseña</label>
                 <div className="relative">
-                  <input className="w-full bg-transparent border-b-2 border-neutral-border focus:border-primary focus:ring-0 px-0 py-3 text-white placeholder-gray-600 outline-none transition-all duration-300" id="password" placeholder="••••••••" type="password"/>
-                  <button type="button" className="absolute right-0 top-3 text-gray-500 hover:text-white cursor-pointer select-none">
-                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                     </svg>
-                  </button>
+                  <input 
+                    className="w-full bg-transparent border-b-2 border-neutral-border focus:border-primary focus:ring-0 px-0 py-3 text-white placeholder-gray-600 outline-none transition-all duration-300" 
+                    id="password" 
+                    placeholder="••••••••" 
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
                 </div>
               </div>
               
               {/* CTA */}
               <div className="pt-4">
-                <Link href="/dashboard" className="w-full bg-gradient-to-br from-primary to-[#B8860B] text-neutral-900 font-bold py-4 rounded-xl shadow-lg hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-center">
-                  Crear Cuenta
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                  </svg>
-                </Link>
+                <button 
+                  type="submit" 
+                  disabled={loading}
+                  className="w-full bg-gradient-to-br from-primary to-[#B8860B] text-neutral-900 font-bold py-4 rounded-xl shadow-lg hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-center disabled:opacity-50"
+                >
+                  {loading ? 'Cargando...' : 'Crear Cuenta'}
+                  {!loading && (
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                  )}
+                </button>
               </div>
             </form>
             

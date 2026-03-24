@@ -24,4 +24,4 @@ COPY --from=builder /app/drizzle.config.ts ./drizzle.config.ts
 COPY package.json pnpm-lock.yaml ./
 EXPOSE 3001
 # Aplica migraciones pendientes y arranca el servidor
-CMD ["sh", "-c", "pnpm db:migrate && node dist/main.js"]
+CMD ["sh", "-c", "pnpm db:migrate && node dist/src/main.js"]

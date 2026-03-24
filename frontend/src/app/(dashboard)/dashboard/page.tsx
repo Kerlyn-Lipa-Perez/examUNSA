@@ -44,22 +44,20 @@ export default function DashboardPage() {
                   <circle cx="50" cy="50" r="45" fill="none" stroke="#D4A017" strokeWidth="10" strokeDasharray="283" strokeDashoffset="84.9" strokeLinecap="round" />
                 </svg>
                 <div className="absolute inset-0 flex items-center justify-center flex-col">
-                  <span className="text-2xl font-bold text-white">14<span className="text-sm text-gray-500 font-normal">/20</span></span>
+                  <span className="font-mono text-2xl font-bold text-white">14<span className="font-mono text-sm text-gray-500 font-normal">/20</span></span>
                 </div>
               </div>
               
               <div className="flex-1 space-y-4">
                 <div>
                   <h3 className="text-2xl font-bold text-white mb-2">Matemáticas Avanzada</h3>
-                  <p className="text-gray-400 text-sm">
-                    Finalizado hace 2 horas. Tu desempeño en Álgebra fue superior al 85% de los postulantes.
-                  </p>
+                    Finalizado hace 2 horas. Tu desempeño en Álgebra fue superior al <span className="font-mono">85%</span> de los postulantes.
                 </div>
                 <div className="flex gap-4">
-                  <span className="inline-flex items-center gap-2 bg-neutral-900 px-3 py-1.5 rounded text-xs font-semibold text-gray-300 border border-neutral-border">
+                  <span className="font-mono inline-flex items-center gap-2 bg-neutral-900 px-3 py-1.5 rounded text-xs font-semibold text-gray-300 border border-neutral-border">
                     <span className="text-success text-sm">✓</span> 14 Correctas
                   </span>
-                  <span className="inline-flex items-center gap-2 bg-neutral-900 px-3 py-1.5 rounded text-xs font-semibold text-gray-300 border border-neutral-border">
+                  <span className="font-mono inline-flex items-center gap-2 bg-neutral-900 px-3 py-1.5 rounded text-xs font-semibold text-gray-300 border border-neutral-border">
                     <span className="text-error text-sm">×</span> 6 Incorrectas
                   </span>
                 </div>
@@ -92,7 +90,7 @@ export default function DashboardPage() {
               <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <span className="text-gray-300 text-sm">Duración: 180 min</span>
+              <span className="font-mono text-gray-300 text-sm">Duración: 180 min</span>
             </div>
             <button className="w-full bg-primary hover:bg-yellow-600 text-neutral-900 font-bold py-2.5 rounded-lg transition-colors">
               Agendar Recordatorio
@@ -124,7 +122,7 @@ function StatCard({ title, value, highlight, textHighlight = "text-gray-500" }: 
   return (
     <div className="bg-neutral-800 p-6 rounded-2xl border border-neutral-border">
       <h3 className="text-xs font-semibold text-gray-500 tracking-wider uppercase mb-4">{title}</h3>
-      <div className="flex items-baseline gap-1">
+      <div className="flex items-baseline gap-1 font-mono">
         <span className={`text-4xl font-bold text-white ${textHighlight && textHighlight !== 'text-gray-500' ? textHighlight : ''}`}>{value}</span>
         {highlight && <span className={`text-sm ${textHighlight}`}>{highlight}</span>}
       </div>
@@ -141,7 +139,7 @@ function Flashcard({ subject, subjectColor, borderClass, sm2, text }: { subject:
         </span>
         <span className="text-xs text-gray-500 font-medium">SM-2: {sm2}</span>
       </div>
-      <p className="text-gray-200 text-sm leading-relaxed line-clamp-3">
+      <p className="font-mono text-gray-200 text-sm leading-relaxed line-clamp-3">
         {text}
       </p>
     </div>
@@ -153,7 +151,7 @@ function ProgressBar({ subject, percent, colorClass, colorHex }: { subject: stri
     <div>
       <div className="flex justify-between items-center mb-2">
         <span className="text-xs font-medium text-gray-300 tracking-wider">{subject}</span>
-        <span className="text-xs font-medium" style={{ color: colorHex }}>{percent}%</span>
+        <span className="font-mono text-xs font-medium" style={{ color: colorHex }}>{percent}%</span>
       </div>
       <div className="h-1.5 w-full bg-neutral-900 rounded-full overflow-hidden">
         <div className={`h-full ${colorClass} rounded-full`} style={{ width: `${percent}%` }} />

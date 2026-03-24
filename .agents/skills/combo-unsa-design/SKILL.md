@@ -35,8 +35,9 @@ Used mainly for tags, badges, and progress bars.
 ## Components Guidelines
 
 ### Typography
-- **Font Family:** Use a clean, modern Sans-Serif font (e.g., `Inter`, `Roboto`, or standard Tailwind sans).
-- **Headings:** Bold and crisp. The main "Hola, Juan" header uses a large font size (`text-3xl` or `text-4xl`) and `font-bold`.
+- **Display/Body:** Space Grotesk (`font-sans`). Use for headings, general text, paragraphs, buttons.
+- **Preguntas/Números/Examen:** JetBrains Mono (`font-mono`). Must be explicitly used on labels, numbers, percentages, test questions, stats, durations, etc.
+- **Headings:** Bold and crisp. The main headers use a large font size (`text-3xl` or `text-4xl`) and `font-bold` inheriting Space Grotesk.
 
 ### Buttons
 - **Primary Button:** `bg-[#D4A017]` with dark/black text (`text-[#0D1117]`). `hover:bg-yellow-600` for interactivity. Rounded corners `rounded-lg` or `rounded-md`. Padding typically `px-4 py-2`.

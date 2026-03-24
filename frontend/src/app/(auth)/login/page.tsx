@@ -1,6 +1,48 @@
+"use client";
 import Link from 'next/link';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Cookies from 'js-cookie';
 
 export default function LoginPage() {
+  const router = useRouter();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+      const res = await fetch(`${apiUrl}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || 'Error al iniciar sesión');
+      }
+
+      if (data.access_token) {
+        Cookies.set('access_token', data.access_token, { expires: 30 });
+        router.push('/dashboard');
+      } else {
+        throw new Error('No se recibió el token de autenticación');
+      }
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="bg-neutral-900 text-white min-h-screen flex flex-col font-sans relative overflow-hidden">
       {/* Background Ambience */}
@@ -29,7 +71,10 @@ export default function LoginPage() {
               <h1 className="text-3xl font-bold tracking-tight text-white mb-2">Ingresar</h1>
               <p className="text-gray-400 text-sm font-light">Portal de Alto Rendimiento Académico</p>
             </div>
-            <form className="space-y-8">
+            
+            {error && <div className="mb-4 text-red-500 text-sm bg-red-900/20 p-3 rounded text-center">{error}</div>}
+
+            <form className="space-y-8" onSubmit={handleSubmit}>
               {/* Input Email/Code */}
               <div className="relative group">
                 <label className="font-mono text-[11px] uppercase tracking-widest text-gray-400 block mb-1 group-focus-within:text-primary transition-colors">Email o Código</label>
@@ -37,7 +82,14 @@ export default function LoginPage() {
                   <svg className="text-gray-500 group-focus-within:text-primary w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
-                  <input className="w-full bg-transparent border-none focus:ring-0 text-white placeholder-gray-600 font-medium outline-none" placeholder="ID Estudiantil o Correo" type="text"/>
+                  <input 
+                    className="w-full bg-transparent border-none focus:ring-0 text-white placeholder-gray-600 font-medium outline-none" 
+                    placeholder="ID Estudiantil o Correo" 
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
                 </div>
               </div>
               {/* Input Password */}
@@ -48,18 +100,31 @@ export default function LoginPage() {
                 </div>
                 <div className="flex items-center border-b-2 border-neutral-border group-focus-within:border-primary transition-all bg-transparent group-focus-within:bg-neutral-700/30 px-1 py-2">
                   <svg className="text-gray-500 group-focus-within:text-primary w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                   </svg>
-                  <input className="w-full bg-transparent border-none focus:ring-0 text-white placeholder-gray-600 font-medium outline-none" placeholder="••••••••" type="password"/>
+                  <input 
+                    className="w-full bg-transparent border-none focus:ring-0 text-white placeholder-gray-600 font-medium outline-none" 
+                    placeholder="••••••••" 
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
                 </div>
               </div>
               {/* Login Button */}
-              <Link href="/dashboard" className="w-full bg-gradient-to-br from-primary to-[#B8860B] py-4 rounded-lg text-neutral-900 font-bold text-lg tracking-tight hover:brightness-110 active:scale-[0.98] transition-all shadow-lg flex items-center justify-center gap-2 text-center group">
-                ACCEDER AL PANEL
-                <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                </svg>
-              </Link>
+              <button 
+                type="submit" 
+                disabled={loading}
+                className="w-full bg-gradient-to-br from-primary to-[#B8860B] py-4 rounded-lg text-neutral-900 font-bold text-lg tracking-tight hover:brightness-110 active:scale-[0.98] transition-all shadow-lg flex items-center justify-center gap-2 text-center group disabled:opacity-50"
+              >
+                {loading ? 'CARGANDO...' : 'ACCEDER AL PANEL'}
+                {!loading && (
+                  <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                )}
+              </button>
             </form>
             <div className="mt-10 pt-8 border-t border-neutral-border text-center">
               <p className="text-gray-400 text-sm">
