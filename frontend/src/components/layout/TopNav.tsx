@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { LogoutButton } from './LogoutButton';
 
 export function TopNav() {
   return (
@@ -30,6 +31,7 @@ export function TopNav() {
         <div className="w-8 h-8 rounded-full bg-secondary overflow-hidden border border-neutral-border">
           <img src="/avatar-placeholder.png" alt="Avatar" className="w-full h-full object-cover" />
         </div>
+        <LogoutButton />
       </div>
     </nav>
   );

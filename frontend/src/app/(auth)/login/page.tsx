@@ -30,11 +30,15 @@ export default function LoginPage() {
         throw new Error(data.message || 'Error al iniciar sesión');
       }
 
-      if (data.token) {
-        Cookies.set('token', data.token, { expires: 30 });
+      const resolvedToken = data.token || data.access_token || data.data?.token || data.data?.access_token;
+
+      if (resolvedToken) {
+        // Guardamos la cookie como "token" que es lo que espera el middleware y el dashboard
+        Cookies.set('token', resolvedToken, { expires: 30 });
         router.push('/dashboard');
       } else {
-        throw new Error('No se recibió el token de autenticación');
+        console.error("Respuesta de login fallida:", data);
+        throw new Error('No se recibió el token de autenticación. Revisa la consola para más detalles.');
       }
     } catch (err: any) {
       setError(err.message);

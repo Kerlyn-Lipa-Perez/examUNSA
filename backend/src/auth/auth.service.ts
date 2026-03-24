@@ -32,6 +32,7 @@ export class AuthService {
 
     return {
       token,
+      access_token: token,
       user: {
         id: newUser.id,
         nombre: newUser.nombre,
@@ -57,6 +58,7 @@ export class AuthService {
 
     return {
       token,
+      access_token: token,
       user: {
         id: user.id,
         nombre: user.nombre,

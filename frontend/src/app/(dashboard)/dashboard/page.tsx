@@ -1,22 +1,35 @@
+
 import { cookies } from 'next/headers';
 
 export default async function DashboardPage() {
   const cookieStore = cookies();
-  const token = cookieStore.get('token')?.value;
+  const token = cookieStore.get('token')?.value || cookieStore.get('access_token')?.value;
 
   let userName = "Usuario";
 
   if (token) {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+      // En SSR (server-side), usamos la URL interna de Docker (backend:3001).
+      // NEXT_PUBLIC_API_URL es para el navegador (localhost:3001).
+      const apiUrl = process.env.API_URL_INTERNAL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+
+      // Timeout de 3 segundos para evitar que la página se quede colgada
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 3000);
+
       const res = await fetch(`${apiUrl}/auth/me`, {
         headers: { Authorization: `Bearer ${token}` },
+        signal: controller.signal,
+        cache: 'no-store',
       });
+      clearTimeout(timeout);
+
       if (res.ok) {
         const user = await res.json();
         userName = user.nombre || "Usuario";
       }
     } catch (err) {
+      // Si hay timeout o error de red, simplemente mostramos "Usuario"
       console.error("Error fetching user info in dashboard:", err);
     }
   }
