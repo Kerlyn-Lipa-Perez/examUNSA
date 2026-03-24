@@ -30,8 +30,8 @@ export default function LoginPage() {
         throw new Error(data.message || 'Error al iniciar sesión');
       }
 
-      if (data.access_token) {
-        Cookies.set('access_token', data.access_token, { expires: 30 });
+      if (data.token) {
+        Cookies.set('token', data.token, { expires: 30 });
         router.push('/dashboard');
       } else {
         throw new Error('No se recibió el token de autenticación');

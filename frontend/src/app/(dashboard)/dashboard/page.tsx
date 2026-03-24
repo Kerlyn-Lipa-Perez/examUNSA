@@ -1,11 +1,32 @@
-export default function DashboardPage() {
+import { cookies } from 'next/headers';
+
+export default async function DashboardPage() {
+  const cookieStore = cookies();
+  const token = cookieStore.get('token')?.value;
+
+  let userName = "Usuario";
+
+  if (token) {
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+      const res = await fetch(`${apiUrl}/auth/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const user = await res.json();
+        userName = user.nombre || "Usuario";
+      }
+    } catch (err) {
+      console.error("Error fetching user info in dashboard:", err);
+    }
+  }
+
   return (
     <div className="max-w-7xl mx-auto space-y-8">
       {/* Header */}
       <div>
-        {/* El nombre tiene que ser una variable */}
         <h1 className="text-3xl font-bold text-white flex items-center gap-2">
-          Hola, Juan <span role="img" aria-label="wave">👋</span>
+          Hola, {userName} <span role="img" aria-label="wave">👋</span>
         </h1>
       </div>
 

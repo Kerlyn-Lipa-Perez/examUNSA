@@ -21,7 +21,6 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Get('me')
   async getMe(@Request() req: any) {
-    // req.user viene del JwtStrategy (contiene userId)
     return this.authService.getMe(req.user.userId);
   }
 }
