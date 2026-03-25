@@ -1,7 +1,10 @@
+'use client';
+
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Home, BookOpen, BarChart2, PieChart, Settings, Calendar } from 'lucide-react';
+
 const SVGIcon = ({ name, className }: { name: string, className?: string }) => {
-  
   return (
     <svg className={`w-5 h-5 ${className || ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       {name === 'dashboard' && <path strokeLinecap="round" strokeLinejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />}
@@ -15,6 +18,17 @@ const SVGIcon = ({ name, className }: { name: string, className?: string }) => {
 };
 
 export function Sidebar() {
+  const pathname = usePathname();
+
+  const getLinkClass = (path: string) => {
+    const isActive = pathname === path || (path !== '/dashboard' && pathname?.startsWith(path));
+    return `flex items-center gap-3 px-3 py-2.5 rounded-lg border-l-4 transition-colors font-medium ${
+      isActive 
+        ? 'bg-neutral-800 text-primary border-primary' 
+        : 'text-gray-400 hover:text-white hover:bg-neutral-800 border-transparent'
+    }`;
+  };
+
   return (
     <aside className="w-64 border-r border-neutral-border bg-neutral-900 hidden md:flex flex-col h-[calc(100vh-4rem)]">
       <div className="p-6">
@@ -24,30 +38,36 @@ export function Sidebar() {
       </div>
 
       <nav className="flex-1 px-4 space-y-1">
-        <Link href="/dashboard" className="flex items-center gap-3 px-3 py-2.5 bg-neutral-800 text-primary rounded-lg border-l-4 border-primary font-medium transition-colors">
+        <Link href="/dashboard" className={getLinkClass('/dashboard')}>
           <SVGIcon name="dashboard" />
           Dashboard
         </Link>
-        <Link href="/cursos" className="flex items-center gap-3 px-3 py-2.5 text-gray-400 hover:text-white hover:bg-neutral-800 rounded-lg border-l-4 border-transparent transition-colors">
+        <Link href="/simulacros" className={getLinkClass('/simulacros')}>
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          Simulacros
+        </Link>
+        <Link href="/cursos" className={getLinkClass('/cursos')}>
           <SVGIcon name="cursos" />
           Cursos
         </Link>
-        <Link href="/ranking" className="flex items-center gap-3 px-3 py-2.5 text-gray-400 hover:text-white hover:bg-neutral-800 rounded-lg border-l-4 border-transparent transition-colors">
+        <Link href="/ranking" className={getLinkClass('/ranking')}>
           <SVGIcon name="ranking" />
           Ranking
         </Link>
-        <Link href="/estadisticas" className="flex items-center gap-3 px-3 py-2.5 text-gray-400 hover:text-white hover:bg-neutral-800 rounded-lg border-l-4 border-transparent transition-colors">
+        <Link href="/estadisticas" className={getLinkClass('/estadisticas')}>
           <SVGIcon name="stats" />
           Estadísticas
         </Link>
-        <Link href="/configuracion" className="flex items-center gap-3 px-3 py-2.5 text-gray-400 hover:text-white hover:bg-neutral-800 rounded-lg border-l-4 border-transparent transition-colors">
+        <Link href="/configuracion" className={getLinkClass('/configuracion')}>
           <SVGIcon name="settings" />
           Configuración
         </Link>
       </nav>
 
       <div className="p-4 mb-4">
-        <Link href="/plan-estudio" className="flex items-center gap-3 px-3 py-2.5 text-gray-400 hover:text-white hover:bg-neutral-800 rounded-lg transition-colors text-sm font-medium">
+        <Link href="/plan-estudio" className={getLinkClass('/plan-estudio')}>
           <SVGIcon name="calendar" className="w-4 h-4" />
           Plan de Estudio
         </Link>

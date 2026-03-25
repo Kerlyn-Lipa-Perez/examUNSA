@@ -1,6 +1,6 @@
 import { Injectable, Inject, ForbiddenException } from '@nestjs/common';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { eq, desc, sql } from 'drizzle-orm';
+import { eq, desc, sql, and } from 'drizzle-orm';
 import { DATABASE_CONNECTION } from '../database/database.provider';
 import * as schema from '../database/schema';
 import { AiService } from '../ai/ai.service';
@@ -45,9 +45,11 @@ export class SimulacrosService {
       .insert(schema.simulacroResults)
       .values({
         userId,
+        examId: dto.examId,
         materia: dto.materia,
         puntaje: dto.puntaje,
         totalPreguntas: dto.respuestas.length,
+        tiempoSegundos: dto.tiempoSegundos,
         respuestas: dto.respuestas,
       })
       .returning();
@@ -79,6 +81,30 @@ export class SimulacrosService {
       .where(eq(schema.simulacroResults.userId, userId))
       .orderBy(desc(schema.simulacroResults.createdAt))
       .limit(limit);
+
+    return historial;
+  }
+
+  async historialPorExamen(userId: string, examId: string) {
+    const historial = await this.db
+      .select({
+        id: schema.simulacroResults.id,
+        examId: schema.simulacroResults.examId,
+        materia: schema.simulacroResults.materia,
+        puntaje: schema.simulacroResults.puntaje,
+        totalPreguntas: schema.simulacroResults.totalPreguntas,
+        tiempoSegundos: schema.simulacroResults.tiempoSegundos,
+        createdAt: schema.simulacroResults.createdAt,
+      })
+      .from(schema.simulacroResults)
+      .where(
+        and(
+          eq(schema.simulacroResults.userId, userId),
+          eq(schema.simulacroResults.examId, examId),
+        ),
+      )
+      .orderBy(desc(schema.simulacroResults.createdAt))
+      .limit(10);
 
     return historial;
   }

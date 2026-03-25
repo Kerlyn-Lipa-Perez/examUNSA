@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, UseGuards, Request } from '@nestjs/common';
+import { Controller, Post, Get, Body, UseGuards, Request, Param } from '@nestjs/common';
 import { SimulacrosService } from './simulacros.service';
 import { GenerarSimulacroDto } from './dto/generar-simulacro.dto';
 import { GuardarResultadoDto } from './dto/guardar-resultado.dto';
@@ -22,5 +22,10 @@ export class SimulacrosController {
   @Get('historial')
   async historial(@Request() req: any) {
     return this.simulacrosService.historial(req.user.userId);
+  }
+
+  @Get('historial/:examId')
+  async historialPorExamen(@Request() req: any, @Param('examId') examId: string) {
+    return this.simulacrosService.historialPorExamen(req.user.userId, examId);
   }
 }

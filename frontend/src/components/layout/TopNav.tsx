@@ -1,7 +1,21 @@
+'use client';
+
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { LogoutButton } from './LogoutButton';
 
 export function TopNav() {
+  const pathname = usePathname();
+
+  const getLinkClass = (path: string) => {
+    const isActive = pathname === path || (path !== '/dashboard' && pathname?.startsWith(path));
+    return `h-16 flex items-center px-1 text-sm font-medium transition-colors ${
+      isActive 
+        ? 'text-primary border-b-2 border-primary' 
+        : 'text-gray-400 hover:text-white border-b-2 border-transparent'
+    }`;
+  };
+
   return (
     <nav className="h-16 border-b border-neutral-border bg-neutral-900 flex items-center justify-between px-6 sticky top-0 z-50">
       <div className="flex items-center gap-8">
@@ -9,13 +23,13 @@ export function TopNav() {
           <span className="text-primary">Combo</span> <span className="text-white">UNSA</span>
         </Link>
         <div className="hidden md:flex items-center gap-6">
-          <Link href="/dashboard" className="text-primary border-b-2 border-primary h-16 flex items-center px-1 text-sm font-medium">
+          <Link href="/dashboard" className={getLinkClass('/dashboard')}>
             Dashboard
           </Link>
-          <Link href="/simulacros" className="text-gray-400 hover:text-white transition-colors h-16 flex items-center px-1 text-sm font-medium">
+          <Link href="/simulacros" className={getLinkClass('/simulacros')}>
             Simulacros
           </Link>
-          <Link href="/flashcards" className="text-gray-400 hover:text-white transition-colors h-16 flex items-center px-1 text-sm font-medium">
+          <Link href="/flashcards" className={getLinkClass('/flashcards')}>
             Flashcards
           </Link>
         </div>

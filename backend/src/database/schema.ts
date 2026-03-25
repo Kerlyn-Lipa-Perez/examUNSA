@@ -23,10 +23,12 @@ export const users = pgTable('users', {
 export const simulacroResults = pgTable('simulacro_results', {
   id:             uuid('id').primaryKey().defaultRandom(),
   userId:         uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  examId:         varchar('exam_id', { length: 100 }),
   materia:        varchar('materia', { length: 50 }).notNull(),
   puntaje:        integer('puntaje').notNull(),
   totalPreguntas: integer('total_preguntas').notNull(),
-  // [{preguntaIdx, elegida, correcta, explicacion}]
+  tiempoSegundos: integer('tiempo_segundos'),
+  // [{preguntaIdx, elegida, correcta}]
   respuestas:     jsonb('respuestas').notNull(),
   createdAt:      timestamp('created_at').defaultNow().notNull(),
 });
