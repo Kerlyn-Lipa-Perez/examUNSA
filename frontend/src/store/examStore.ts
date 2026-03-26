@@ -1,6 +1,7 @@
 // frontend/src/store/examStore.ts
 import { create } from 'zustand';
 import { Question, UserAnswer, ExamData } from '@/types/simulacro';
+import api from '@/lib/axios';
 
 interface ExamState {
   // Exam data
@@ -13,7 +14,8 @@ interface ExamState {
   timerActive: boolean;
 
   // Status
-  status: 'idle' | 'loading' | 'in-progress' | 'finished';
+  status: 'idle' | 'loading' | 'in-progress' | 'submitting' | 'finished';
+  submitError: string | null;
 
   // Actions
   startExam: (examData: ExamData) => void;
@@ -38,6 +40,7 @@ export const useExamStore = create<ExamState>()((set, get) => ({
   tiempoRestanteSegundos: 0,
   timerActive: false,
   status: 'idle',
+  submitError: null,
 
   startExam: (examData: ExamData) => {
     const answers: UserAnswer[] = examData.preguntas.map((p) => ({
@@ -51,6 +54,7 @@ export const useExamStore = create<ExamState>()((set, get) => ({
       tiempoRestanteSegundos: examData.meta.tiempoMinutos * 60,
       timerActive: true,
       status: 'in-progress',
+      submitError: null,
     });
   },
 
@@ -93,7 +97,48 @@ export const useExamStore = create<ExamState>()((set, get) => ({
   },
 
   finishExam: () => {
-    set({ status: 'finished', timerActive: false });
+    const { examData, userAnswers, tiempoRestanteSegundos } = get();
+    // Stop the timer and mark as submitting
+    set({ timerActive: false, status: 'submitting', submitError: null });
+
+    if (!examData) {
+      set({ status: 'finished' });
+      return;
+    }
+
+    // Calculate score
+    const score = get().getScore();
+    const tiempoUsado = examData.meta.tiempoMinutos * 60 - tiempoRestanteSegundos;
+
+    // Build the payload matching GuardarResultadoDto
+    const payload = {
+      examId: examData.meta.id,
+      materia: examData.meta.area,
+      puntaje: score.correctas,
+      tiempoSegundos: tiempoUsado,
+      respuestas: userAnswers.map((a) => {
+        const question = examData.preguntas.find((p) => p.id === a.preguntaId);
+        return {
+          preguntaId: a.preguntaId,
+          elegida: a.respuesta,
+          correcta: question?.respuestaCorrecta ?? null,
+        };
+      }),
+    };
+
+    // Send to backend (fire-and-forget style, don't block navigation)
+    api
+      .post('/simulacros/resultado', payload)
+      .then(() => {
+        console.log('✅ Resultado del simulacro guardado en la base de datos');
+      })
+      .catch((err) => {
+        console.error('❌ Error al guardar resultado del simulacro:', err);
+        set({ submitError: 'No se pudo guardar el resultado. Intenta de nuevo.' });
+      })
+      .finally(() => {
+        set({ status: 'finished' });
+      });
   },
 
   resetExam: () => {
@@ -104,6 +149,7 @@ export const useExamStore = create<ExamState>()((set, get) => ({
       tiempoRestanteSegundos: 0,
       timerActive: false,
       status: 'idle',
+      submitError: null,
     });
   },
 

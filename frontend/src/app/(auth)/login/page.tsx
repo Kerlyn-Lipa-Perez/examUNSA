@@ -3,9 +3,11 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
+import { useAuthStore } from '@/store/authStore';
 
 export default function LoginPage() {
   const router = useRouter();
+  const { setAuth } = useAuthStore();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -31,9 +33,14 @@ export default function LoginPage() {
       }
 
       const resolvedToken = data.token || data.access_token || data.data?.token || data.data?.access_token;
+      const resolvedUser = data.user || data.data?.user;
 
-      if (resolvedToken) {
-        // Guardamos la cookie como "token" que es lo que espera el middleware y el dashboard
+      if (resolvedToken && resolvedUser) {
+        // Guardamos en el store de Zustand (persiste en localStorage + cookie)
+        setAuth(resolvedUser, resolvedToken);
+        router.push('/dashboard');
+      } else if (resolvedToken) {
+        // Token sin user (fallback)
         Cookies.set('token', resolvedToken, { expires: 30 });
         router.push('/dashboard');
       } else {
@@ -46,6 +53,7 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="bg-neutral-900 text-white min-h-screen flex flex-col font-sans relative overflow-hidden">

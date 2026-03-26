@@ -34,14 +34,13 @@ export default function ExamPage() {
   const [loading, setLoading] = useState(true);
   const [showConfirm, setShowConfirm] = useState(false);
 
-  // Load exam data
   useEffect(() => {
     async function load() {
       setLoading(true);
       const data = await loadExam('UNSA', area, examId);
       if (data) {
         if (data.preguntas.length === 0) {
-          // No questions available
+  
           setLoading(false);
           return;
         }
@@ -50,25 +49,37 @@ export default function ExamPage() {
       setLoading(false);
     }
 
-    // Only load if not already loaded
+
     if (status === 'idle') {
       load();
     } else {
       setLoading(false);
     }
 
-    // Cleanup on unmount
+   
     return () => {
-      // Don't reset if navigating to results
-    };
-  }, [area, examId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // When exam finishes (timer or manual), navigate to results
+    };
+  }, [area, examId]); 
+
+
   useEffect(() => {
     if (status === 'finished') {
       router.push(`/simulacros/UNSA/${area}/${examId}/results`);
     }
   }, [status, router, area, examId]);
+
+
+  if (status === 'submitting') {
+    return (
+      <div className="min-h-screen bg-neutral-900 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="w-12 h-12 border-4 border-neutral-700 border-t-primary rounded-full animate-spin mx-auto" />
+          <p className="text-gray-400 font-mono text-sm">Guardando resultados...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Loading state
   if (loading) {

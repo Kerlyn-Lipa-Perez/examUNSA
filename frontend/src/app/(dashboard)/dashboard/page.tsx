@@ -1,46 +1,12 @@
 
-import { cookies } from 'next/headers';
+import { UserGreeting } from '@/components/dashboard/UserGreeting';
 
-export default async function DashboardPage() {
-  const cookieStore = cookies();
-  const token = cookieStore.get('token')?.value || cookieStore.get('access_token')?.value;
-
-  let userName = "Usuario";
-
-  if (token) {
-    try {
-      // En SSR (server-side), usamos la URL interna de Docker (backend:3001).
-      // NEXT_PUBLIC_API_URL es para el navegador (localhost:3001).
-      const apiUrl = process.env.API_URL_INTERNAL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
-
-      // Timeout de 3 segundos para evitar que la página se quede colgada
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 3000);
-
-      const res = await fetch(`${apiUrl}/auth/me`, {
-        headers: { Authorization: `Bearer ${token}` },
-        signal: controller.signal,
-        cache: 'no-store',
-      });
-      clearTimeout(timeout);
-
-      if (res.ok) {
-        const user = await res.json();
-        userName = user.nombre || "Usuario";
-      }
-    } catch (err) {
-      // Si hay timeout o error de red, simplemente mostramos "Usuario"
-      console.error("Error fetching user info in dashboard:", err);
-    }
-  }
-
+export default function DashboardPage() {
   return (
     <div className="max-w-7xl mx-auto space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-white flex items-center gap-2">
-          Hola, {userName} <span role="img" aria-label="wave">👋</span>
-        </h1>
+        <UserGreeting />
       </div>
 
       {/* Stats Grid */}

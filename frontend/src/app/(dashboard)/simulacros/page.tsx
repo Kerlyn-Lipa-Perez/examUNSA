@@ -1,6 +1,9 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
+import unsaLogo from '@/assets/Escudo_UNSA.png';
+import ucsmLogo from '@/assets/Escudo_UCSM.webp';
 
 const universities = [
   {
@@ -10,6 +13,7 @@ const universities = [
     description: 'Simulacros de admisión para la UNSA',
     examsCount: 3,
     color: '#D4A017',
+    logo: unsaLogo,
   },
   {
     id: 'UCSM',
@@ -19,6 +23,7 @@ const universities = [
     examsCount: 0,
     color: '#3B82F6',
     comingSoon: true,
+    logo: ucsmLogo,
   },
 ];
 
@@ -39,10 +44,16 @@ export default function SimulacrosPage() {
               <div className="bg-neutral-800 rounded-2xl p-8 border border-neutral-border opacity-60 cursor-not-allowed">
                 <div className="flex items-start justify-between mb-6">
                   <div
-                    className="w-14 h-14 rounded-xl flex items-center justify-center text-2xl font-bold"
-                    style={{ backgroundColor: `${uni.color}15`, color: uni.color }}
+                    className="w-14 h-14 rounded-xl flex items-center justify-center overflow-hidden"
+                    style={{ backgroundColor: `${uni.color}15` }}
                   >
-                    {uni.name.charAt(0)}
+                    <Image
+                      src={uni.logo}
+                      alt={`Logo ${uni.name}`}
+                      width={48}
+                      height={48}
+                      className="object-contain"
+                    />
                   </div>
                   <span className="text-xs font-mono px-3 py-1 rounded-full bg-neutral-700 text-gray-400 border border-neutral-border">
                     Próximamente
@@ -57,10 +68,16 @@ export default function SimulacrosPage() {
                 <div className="bg-neutral-800 rounded-2xl p-8 border border-neutral-border hover:border-primary/30 transition-all duration-300 group-hover:bg-neutral-700/50 cursor-pointer">
                   <div className="flex items-start justify-between mb-6">
                     <div
-                      className="w-14 h-14 rounded-xl flex items-center justify-center text-2xl font-bold transition-transform duration-300 group-hover:scale-110"
-                      style={{ backgroundColor: `${uni.color}15`, color: uni.color }}
+                      className="w-14 h-14 rounded-xl flex items-center justify-center overflow-hidden transition-transform duration-300 group-hover:scale-110"
+                      style={{ backgroundColor: `${uni.color}15` }}
                     >
-                      {uni.name.charAt(0)}
+                      <Image
+                        src={uni.logo}
+                        alt={`Logo ${uni.name}`}
+                        width={48}
+                        height={48}
+                        className="object-contain"
+                      />
                     </div>
                     <span className="font-mono text-xs px-3 py-1 rounded-full border border-primary/20 text-primary bg-primary/5">
                       {uni.examsCount} exámenes
