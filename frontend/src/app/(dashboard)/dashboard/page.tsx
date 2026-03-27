@@ -75,26 +75,32 @@ export default function DashboardPage() {
         {/* Right Column (Takes 1/3 width) */}
         <div className="space-y-8">
           {/* Próximo Simulacro */}
-          <div className="bg-[#241d08] rounded-2xl p-6 border border-primary/20">
-            <div className="flex justify-between items-start mb-6">
-              <h3 className="text-primary font-bold">Próximo simulacro</h3>
-              <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          <div className="bg-[#1a1f2e] rounded-2xl p-6 border border-white/5 flex flex-col items-center text-center gap-5">
+            {/* Timer Icon */}
+            <div className="w-14 h-14 rounded-xl bg-primary/15 flex items-center justify-center">
+              <svg className="w-7 h-7 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <div className="mb-6">
-              <p className="text-white font-bold mb-1">Simulacro General Tipo A</p>
-              <p className="text-gray-400 text-sm">Mañana, 08:30 AM</p>
+
+            {/* Title + Subtitle */}
+            <div className="space-y-2">
+              <h3 className="text-white text-xl font-bold leading-snug">Pon a prueba tu nivel</h3>
+              <p className="text-gray-400 text-sm leading-relaxed">
+                Inicia el simulacro de tu preferencia y mide tu progreso real frente a otros postulantes.
+              </p>
             </div>
-            <div className="bg-neutral-900/50 rounded-lg p-3 flex items-center gap-3 mb-6">
-              <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span className="font-mono text-gray-300 text-sm">Duración: 180 min</span>
-            </div>
-            <button className="w-full bg-primary hover:bg-yellow-600 text-neutral-900 font-bold py-2.5 rounded-lg transition-colors">
-              Agendar Recordatorio
+
+            {/* CTA Button */}
+            <button className="w-full bg-primary hover:bg-yellow-500 active:scale-95 text-neutral-900 font-bold py-3 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 text-sm">
+              <span>🚀</span>
+              Iniciar Simulacro
             </button>
+
+            {/* Metadata */}
+            <p className="font-mono text-[11px] text-gray-600 tracking-widest uppercase">
+              3 Horas&nbsp;&nbsp;•&nbsp;&nbsp;Modo Examen
+            </p>
           </div>
 
           {/* Progreso por materia */}
