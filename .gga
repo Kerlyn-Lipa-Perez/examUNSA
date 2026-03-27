@@ -1,0 +1,14 @@
+# AI Provider (required)
+PROVIDER=github:gpt-4o
+
+# Acuteena review
+FILE_PATTERNS=*.ts,*.tsx,*.js,*.jsx,*.go,*.py
+
+# Archivos a excluir
+EXCLUDE_PATTERNS=*.test.ts,*.spec.ts,*.d.ts,*.test.tsx,*.spec.tsx,node_modules/*,.evn
+
+# Modo estricto (rechaza si la IA responde ambiguo)
+STRICT_MODE=true
+
+# Timeout en segundos
+TIMEOUT=300
