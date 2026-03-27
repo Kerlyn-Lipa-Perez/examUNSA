@@ -1,5 +1,7 @@
 
 import { UserGreeting } from '@/components/dashboard/UserGreeting';
+import { LastSimulacro } from '@/components/dashboard/LastSimulacro';
+import Link from 'next/link';
 
 export default function DashboardPage() {
   return (
@@ -34,42 +36,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Último simulacro */}
-          <div>
-            <h2 className="text-xl font-bold text-white mb-4">Último simulacro</h2>
-            <div className="bg-neutral-800 rounded-2xl p-8 border border-neutral-border flex flex-col md:flex-row gap-8 items-center">
-              {/* Circular Progress */}
-              <div className="relative w-32 h-32 flex-shrink-0">
-                <svg viewBox="0 0 100 100" className="w-full h-full transform -rotate-90">
-                  <circle cx="50" cy="50" r="45" fill="none" stroke="#1E2532" strokeWidth="10" />
-                  <circle cx="50" cy="50" r="45" fill="none" stroke="#D4A017" strokeWidth="10" strokeDasharray="283" strokeDashoffset="84.9" strokeLinecap="round" />
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center flex-col">
-                  <span className="font-mono text-2xl font-bold text-white">14<span className="font-mono text-sm text-gray-500 font-normal">/20</span></span>
-                </div>
-              </div>
-              
-              <div className="flex-1 space-y-4">
-                <div>
-                  <h3 className="text-2xl font-bold text-white mb-2">Matemáticas Avanzada</h3>
-                    Finalizado hace 2 horas. Tu desempeño en Álgebra fue superior al <span className="font-mono">85%</span> de los postulantes.
-                </div>
-                <div className="flex gap-4">
-                  <span className="font-mono inline-flex items-center gap-2 bg-neutral-900 px-3 py-1.5 rounded text-xs font-semibold text-gray-300 border border-neutral-border">
-                    <span className="text-success text-sm">✓</span> 14 Correctas
-                  </span>
-                  <span className="font-mono inline-flex items-center gap-2 bg-neutral-900 px-3 py-1.5 rounded text-xs font-semibold text-gray-300 border border-neutral-border">
-                    <span className="text-error text-sm">×</span> 6 Incorrectas
-                  </span>
-                </div>
-              </div>
-              
-              <div>
-                <button className="bg-secondary hover:bg-opacity-80 text-white px-6 py-2 rounded-lg font-medium transition-colors">
-                  Revisar errores
-                </button>
-              </div>
-            </div>
-          </div>
+          <LastSimulacro />
         </div>
 
         {/* Right Column (Takes 1/3 width) */}
@@ -94,7 +61,9 @@ export default function DashboardPage() {
             {/* CTA Button */}
             <button className="w-full bg-primary hover:bg-yellow-500 active:scale-95 text-neutral-900 font-bold py-3 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 text-sm">
               <span>🚀</span>
-              Iniciar Simulacro
+              <Link href="/simulacros">
+                Iniciar Simulacro
+              </Link>
             </button>
 
             {/* Metadata */}

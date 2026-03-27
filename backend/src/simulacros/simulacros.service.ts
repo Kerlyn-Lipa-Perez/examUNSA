@@ -72,6 +72,7 @@ export class SimulacrosService {
     const historial = await this.db
       .select({
         id: schema.simulacroResults.id,
+        examId: schema.simulacroResults.examId,
         materia: schema.simulacroResults.materia,
         puntaje: schema.simulacroResults.puntaje,
         totalPreguntas: schema.simulacroResults.totalPreguntas,
@@ -107,5 +108,16 @@ export class SimulacrosService {
       .limit(10);
 
     return historial;
+  }
+
+  async getResultado(userId: string, resultId: string) {
+    const resultado = await this.db.query.simulacroResults.findFirst({
+      where: and(
+        eq(schema.simulacroResults.id, resultId),
+        eq(schema.simulacroResults.userId, userId),
+      ),
+    });
+
+    return resultado ?? null;
   }
 }

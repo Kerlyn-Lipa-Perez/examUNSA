@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, UseGuards, Request, Param } from '@nestjs/common';
+import { Controller, Post, Get, Body, UseGuards, Request, Param, NotFoundException } from '@nestjs/common';
 import { SimulacrosService } from './simulacros.service';
 import { GenerarSimulacroDto } from './dto/generar-simulacro.dto';
 import { GuardarResultadoDto } from './dto/guardar-resultado.dto';
@@ -17,6 +17,13 @@ export class SimulacrosController {
   @Post('resultado')
   async guardarResultado(@Request() req: any, @Body() dto: GuardarResultadoDto) {
     return this.simulacrosService.guardarResultado(req.user.userId, dto);
+  }
+
+  @Get('resultado/:id')
+  async getResultado(@Request() req: any, @Param('id') id: string) {
+    const resultado = await this.simulacrosService.getResultado(req.user.userId, id);
+    if (!resultado) throw new NotFoundException('Resultado no encontrado');
+    return resultado;
   }
 
   @Get('historial')
