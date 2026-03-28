@@ -48,6 +48,12 @@ export function Sidebar() {
           </svg>
           Simulacros
         </Link>
+        <Link href="/flashcards/hoy" className={getLinkClass('/flashcards')}>
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+          </svg>
+          Flashcards
+        </Link>
         <Link href="/cursos" className={getLinkClass('/cursos')}>
           <SVGIcon name="cursos" />
           Cursos
@@ -59,6 +65,12 @@ export function Sidebar() {
         <Link href="/estadisticas" className={getLinkClass('/estadisticas')}>
           <SVGIcon name="stats" />
           Estadísticas
+        </Link>
+        <Link href="/perfil" className={getLinkClass('/perfil')}>
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
+          Mi Perfil
         </Link>
         <Link href="/configuracion" className={getLinkClass('/configuracion')}>
           <SVGIcon name="settings" />

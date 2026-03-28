@@ -267,7 +267,7 @@ export default function TerminosPage() {
               <p>
                 <strong className="text-white">Correo electrónico:</strong>{' '}
                 <a href="mailto:legal@combounsa.com" className="text-primary hover:underline">
-                  legal@combounsa.com
+                  kerlyn.lipa@estudiante.ucsm.edu.pe
                 </a>
               </p>
               <p>

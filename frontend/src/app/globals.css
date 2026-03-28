@@ -61,3 +61,30 @@ body {
     linear-gradient(90deg, rgba(212, 160, 23, 0.025) 1px, transparent 1px);
   background-size: 60px 60px;
 }
+
+/* ─── Flashcard Flip Animation ──────────────────── */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+
+/* ─── Fade In Animation ──────────────────── */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out both;
+}

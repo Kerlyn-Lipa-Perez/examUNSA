@@ -8,16 +8,33 @@ import { relations, sql } from 'drizzle-orm';
 
 // ─── USERS ───────────────────────────────────────────────────────────────────
 export const users = pgTable('users', {
-  id:             uuid('id').primaryKey().defaultRandom(),
-  email:          varchar('email', { length: 255 }).unique().notNull(),
-  passwordHash:   varchar('password_hash', { length: 255 }).notNull(),
-  nombre:         varchar('nombre', { length: 100 }).notNull(),
-  plan:           varchar('plan', { length: 10 }).default('free').notNull(), // 'free' | 'pro'
-  simulacrosHoy:  integer('simulacros_hoy').default(0).notNull(),
-  streakDias:     integer('streak_dias').default(0).notNull(),
-  ultimoAcceso:   date('ultimo_acceso'),
-  createdAt:      timestamp('created_at').defaultNow().notNull(),
+  id:                   uuid('id').primaryKey().defaultRandom(),
+  email:                varchar('email', { length: 255 }).unique().notNull(),
+  passwordHash:         varchar('password_hash', { length: 255 }).notNull(),
+  nombre:               varchar('nombre', { length: 100 }).notNull(),
+  plan:                 varchar('plan', { length: 10 }).default('free').notNull(), // 'free' | 'pro'
+  simulacrosHoy:        integer('simulacros_hoy').default(0).notNull(),
+  streakDias:           integer('streak_dias').default(0).notNull(),
+  ultimoAcceso:         date('ultimo_acceso'),
+  createdAt:            timestamp('created_at').defaultNow().notNull(),
+  
+  // Password reset
+  passwordResetToken:   varchar('password_reset_token', { length: 255 }),
+  passwordResetExpires: timestamp('password_reset_expires'),
+  
+  // Preferencias del usuario (JSONB)
+  preferencias:         jsonb('preferencias').$type<UserPreferences>(),
 });
+
+export interface UserPreferences {
+  metaDiariaHoras: number;
+  flashcardsNuevasDia: number;
+  recordatorioActivo: boolean;
+  horaRecordatorio: string;
+  notificacionesEmail: boolean;
+  sonidosTimer: boolean;
+  vibracion: boolean;
+}
 
 // ─── SIMULACRO RESULTS ────────────────────────────────────────────────────────
 export const simulacroResults = pgTable('simulacro_results', {
