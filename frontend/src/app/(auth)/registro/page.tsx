@@ -1,5 +1,6 @@
 "use client";
 import Link from 'next/link';
+import { Footer } from '@/components/layout/Footer';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
@@ -192,16 +193,7 @@ export default function RegisterPage() {
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="w-full py-8 px-6 flex flex-col md:flex-row justify-between items-center gap-4 border-t border-neutral-border bg-neutral-900 z-10 mt-auto">
-        <div className="font-mono text-[11px] uppercase tracking-widest text-primary">
-            © 2026 COMBO UNSA. Unknown Company.
-        </div>
-        <div className="flex gap-6">
-          <Link href="#" className="font-mono text-[11px] uppercase tracking-widest text-gray-500 hover:text-primary underline decoration-primary/50">Privacy Policy</Link>
-          <Link href="#" className="font-mono text-[11px] uppercase tracking-widest text-gray-500 hover:text-primary underline decoration-primary/50">Terms of Service</Link>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

@@ -32,13 +32,13 @@ Combo UNSA is an academic preparation platform for UNSA university applicants. S
 
 ### App Router Structure
 - Pages go in `src/app/` using the App Router conventions.
-- Use `'use client'` directive only when the component needs interactivity (hooks, event handlers).
+- Use `'use client'` directive only when the component needs interactivity (hooks, event handlers) OR imports client-only libraries (e.g. lucide-react, Zustand stores).
 - Server components by default. Minimize client component boundaries.
 
 ### Components
 - Functional components only. No class components.
 - Use TypeScript interfaces for props, named `ComponentNameProps`.
-- Export named functions, not default exports: `export function QuestionCard(...)` not `export default ...`.
+- Export named functions, not default exports: `export function QuestionCard(...)` not `export default ...`. EXCEPTION: Next.js App Router `page.tsx`, `layout.tsx`, `loading.tsx`, and `error.tsx` files MUST use `export default` — this is a framework requirement.
 - Keep components in `src/components/` organized by feature: `dashboard/`, `simulacro/`, `layout/`, `ui/`.
 
 ### Styling — Combo UNSA Design System
