@@ -56,7 +56,7 @@ export default function LandingPage() {
               Ingresar
             </Link>
             <Link
-              href="/register"
+              href="/registro"
               className="px-5 py-2 text-sm font-bold bg-primary text-neutral-900 rounded-lg hover:bg-yellow-600 transition-all shadow-lg shadow-primary/20 hover:shadow-primary/40 active:scale-95"
             >
               Comenzar Gratis
@@ -100,7 +100,7 @@ export default function LandingPage() {
 
                 <div className="animate-fade-in-up delay-300 flex flex-col sm:flex-row items-start gap-4">
                   <Link
-                    href="/register"
+                    href="/registro"
                     className="group w-full sm:w-auto px-8 py-4 bg-primary text-neutral-900 rounded-xl font-bold text-base flex items-center justify-center gap-3 hover:bg-yellow-600 transition-all shadow-xl shadow-primary/25 hover:shadow-primary/40 hover:-translate-y-0.5"
                   >
                     Empezar ahora — es gratis
@@ -445,7 +445,7 @@ export default function LandingPage() {
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
-                href="/register"
+                href="/registro"
                 className="group w-full sm:w-auto px-10 py-5 bg-primary text-neutral-900 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 hover:bg-yellow-600 transition-all shadow-2xl shadow-primary/30 hover:shadow-primary/50 hover:-translate-y-0.5"
               >
                 Crear cuenta gratis

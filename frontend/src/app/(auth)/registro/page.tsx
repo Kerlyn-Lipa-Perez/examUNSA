@@ -9,7 +9,6 @@ export default function RegisterPage() {
   const router = useRouter();
   const [nombre, setNombre] = useState('');
   const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -115,21 +114,6 @@ export default function RegisterPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                  />
-                </div>
-              </div>
-              
-              {/* Celular */}
-              <div className="space-y-1">
-                <label className="font-mono text-[11px] uppercase tracking-widest text-gray-500" htmlFor="phone">Celular</label>
-                <div className="relative">
-                  <input 
-                    className="font-mono w-full bg-transparent border-b-2 border-neutral-border focus:border-primary focus:ring-0 px-0 py-3 text-white placeholder-gray-600 outline-none transition-all duration-300" 
-                    id="phone" 
-                    placeholder="987 654 321" 
-                    type="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
                   />
                 </div>
               </div>

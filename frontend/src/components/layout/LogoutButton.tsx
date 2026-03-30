@@ -1,15 +1,15 @@
 "use client";
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Cookies from 'js-cookie';
+import { useAuthStore } from '@/store/authStore';
 
 export function LogoutButton() {
   const router = useRouter();
   const [showConfirm, setShowConfirm] = useState(false);
+  const logout = useAuthStore((s) => s.logout);
 
   const handleLogout = () => {
-    Cookies.remove('token');
-    Cookies.remove('access_token');
+    logout();
     router.push('/login');
   };
 

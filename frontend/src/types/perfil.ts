@@ -47,7 +47,7 @@ export function formatFecha(fechaStr: string | undefined): string {
 export const MATERIA_COLORS: Record<string, string> = {
   biologia: 'text-success',
   fisica: 'text-info',
-  matematiographics: 'text-info',
+  matematicas: 'text-info',
   historia: 'text-error',
   geografia: 'text-info',
   economia: 'text-warning',
