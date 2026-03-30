@@ -85,7 +85,7 @@ export function PlanCard({ profile, isLoading }: PlanCardProps) {
       </div>
 
       <Link
-        href="/dashboard"
+        href="/checkout"
         className="block w-full bg-primary hover:bg-yellow-600 text-neutral-900 py-3 rounded-lg text-sm font-bold text-center transition-colors"
       >
         Mejorar a Pro

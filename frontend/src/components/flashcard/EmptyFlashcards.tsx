@@ -44,7 +44,7 @@ export function EmptyFlashcards({ hasProAccess = false }: EmptyFlashcardsProps) 
         
         {!hasProAccess && (
           <Link
-            href="/dashboard"
+            href="/checkout"
             className="inline-flex items-center gap-2 border border-neutral-border text-gray-400 px-6 py-3 rounded-lg font-medium hover:text-white transition-colors"
           >
             Mejora tu Plan

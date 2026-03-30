@@ -68,7 +68,7 @@ export function ProgressMaterias({ stats, isLoading }: ProgressMateriasProps) {
               <div className="flex justify-between items-center mb-1">
                 <span className="text-sm font-medium text-gray-300">{label}</span>
                 <div className="flex items-center gap-2">
-                  <span className="font-mono text-sm" style={{ color: getColorHex(promedio(data.promedio)) }}>
+                  <span className="font-mono text-sm" style={{ color: getColorHex(data.promedio) }}>
                     {data.promedio}%
                   </span>
                   <span className="text-xs text-gray-500">({data.simulacros} simul.)</span>

@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, Request, HttpCode } from '@nestjs/common';
+import { Controller, Post, Get, Body, UseGuards, Request, HttpCode } from '@nestjs/common';
 import { PagosService } from './pagos.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
@@ -10,6 +10,12 @@ export class PagosController {
   @Post('checkout')
   async crearCheckout(@Request() req: any, @Body('planId') planId: string) {
     return this.pagosService.crearCheckout(req.user.userId, planId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('historial')
+  async getHistorial(@Request() req: any) {
+    return this.pagosService.getHistorial(req.user.userId);
   }
 
   // El webhook no usa JwtAuthGuard porque lo llama Culqi externamente

@@ -80,15 +80,32 @@ export const flashcardProgress = pgTable(
   }),
 );
 
+// ─── PAGOS ───────────────────────────────────────────────────────────────────
+export const pagos = pgTable('pagos', {
+  id:         uuid('id').primaryKey().defaultRandom(),
+  userId:     uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  monto:      integer('monto').notNull(),          // En céntimos (ej: 2990 = S/29.90)
+  moneda:     varchar('moneda', { length: 3 }).default('PEN').notNull(),
+  estado:     varchar('estado', { length: 20 }).default('completado').notNull(), // 'pendiente' | 'completado' | 'fallido'
+  planId:     varchar('plan_id', { length: 20 }).notNull(), // 'free' | 'pro'
+  referencia: varchar('referencia', { length: 100 }),       // ID de Culqi u otra referencia externa
+  createdAt:  timestamp('created_at').defaultNow().notNull(),
+});
+
 // ─── RELACIONES (para joins tipados con Drizzle) ──────────────────────────────
 export const usersRelations = relations(users, ({ many }) => ({
   simulacroResults: many(simulacroResults),
   flashcards:       many(flashcards),
   flashcardProgress: many(flashcardProgress),
+  pagos:            many(pagos),
 }));
 
 export const simulacroResultsRelations = relations(simulacroResults, ({ one }) => ({
   user: one(users, { fields: [simulacroResults.userId], references: [users.id] }),
+}));
+
+export const pagosRelations = relations(pagos, ({ one }) => ({
+  user: one(users, { fields: [pagos.userId], references: [users.id] }),
 }));
 
 export const flashcardsRelations = relations(flashcards, ({ one, many }) => ({
@@ -109,3 +126,5 @@ export type NewSimulacroResult = typeof simulacroResults.$inferInsert;
 export type Flashcard         = typeof flashcards.$inferSelect;
 export type NewFlashcard      = typeof flashcards.$inferInsert;
 export type FlashcardProgress = typeof flashcardProgress.$inferSelect;
+export type Pago              = typeof pagos.$inferSelect;
+export type NewPago           = typeof pagos.$inferInsert;

@@ -4,3 +4,4 @@ export { PlanCard } from './PlanCard';
 export { StatsGrid } from './StatsGrid';
 export { ProgressMaterias } from './ProgressMaterias';
 export { RecentSimulacros } from './RecentSimulacros';
+export { PaymentHistory } from './PaymentHistory';

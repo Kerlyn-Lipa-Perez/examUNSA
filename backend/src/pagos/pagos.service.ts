@@ -1,7 +1,7 @@
 import { Injectable, Inject, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { eq } from 'drizzle-orm';
+import { eq, desc } from 'drizzle-orm';
 import { DATABASE_CONNECTION } from '../database/database.provider';
 import * as schema from '../database/schema';
 
@@ -43,15 +43,45 @@ export class PagosService {
       });
 
       if (user) {
+        // Actualizar plan a Pro
         await this.db
           .update(schema.users)
           .set({ plan: 'pro' })
           .where(eq(schema.users.id, user.id));
+        
+        // Registrar el pago en la tabla pagos
+        const montoCentavos = payload.amount || 2990; // Valor por defecto si no viene
+        
+        await this.db.insert(schema.pagos).values({
+          userId: user.id,
+          monto: montoCentavos,
+          moneda: payload.currency || 'PEN',
+          estado: 'completado',
+          planId: 'pro',
+          referencia: payload.id || `mock_${Date.now()}`,
+        });
         
         console.log(`Plan actualizado a PRO para ${email}`);
       }
     }
 
     return { received: true };
+  }
+
+  async getHistorial(userId: string) {
+    const pagos = await this.db.query.pagos.findMany({
+      where: eq(schema.pagos.userId, userId),
+      orderBy: [desc(schema.pagos.createdAt)],
+    });
+
+    return pagos.map(p => ({
+      id: p.id,
+      monto: p.monto,
+      moneda: p.moneda,
+      estado: p.estado,
+      planId: p.planId,
+      referencia: p.referencia,
+      createdAt: p.createdAt,
+    }));
   }
 }

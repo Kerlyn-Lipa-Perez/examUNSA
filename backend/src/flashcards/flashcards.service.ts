@@ -173,12 +173,51 @@ export class FlashcardsService {
   }
 
   async stats(userId: string) {
-    // Stats básicos
+    const today = new Date().toISOString().split('T')[0];
+
+    // Tarjetas del usuario (creadas por él)
+    const userCards = await this.db.query.flashcards.findMany({
+      where: eq(schema.flashcards.userId, userId),
+    });
+
+    // Progreso del usuario (tarjetas que ha estudiado)
+    const progress = await this.db.query.flashcardProgress.findMany({
+      where: eq(schema.flashcardProgress.userId, userId),
+    });
+
+    // Estudiadas hoy: progreso con proximaRevision actualizada hoy
+    const estudiadasHoy = progress.filter(p => p.proximaRevision <= today).length;
+
+    // Contar por materia
+    const porMateria: Record<string, number> = {};
+    for (const card of userCards) {
+      porMateria[card.materia] = (porMateria[card.materia] || 0) + 1;
+    }
+
+    // También incluir tarjetas del sistema que el usuario ha estudiado
+    const systemCards = await this.db.query.flashcards.findMany({
+      where: isNull(schema.flashcards.userId),
+    });
+
+    // Agregar tarjetas del sistema al conteo por materia
+    for (const card of systemCards) {
+      // Verificar si el usuario tiene progreso con esta tarjeta del sistema
+      const hasProgress = progress.some(p => p.flashcardId === card.id);
+      if (hasProgress) {
+        porMateria[card.materia] = (porMateria[card.materia] || 0) + 1;
+      }
+    }
+
+    // Total: tarjetas propias + tarjetas del sistema con progreso
+    const totalCards = userCards.length + progress.filter(p => {
+      return systemCards.some(c => c.id === p.flashcardId);
+    }).length;
+
     return {
-      totalCards: 0,
-      estudiadasHoy: 0,
+      totalCards,
+      estudiadasHoy,
       streak: 0,
-      porMateria: {}
+      porMateria,
     };
   }
 }

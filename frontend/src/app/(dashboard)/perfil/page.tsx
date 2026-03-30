@@ -7,6 +7,7 @@ import {
   StatsGrid,
   ProgressMaterias,
   RecentSimulacros,
+  PaymentHistory,
 } from '@/components/perfil';
 import { Loader2, User, Settings, LogOut } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
@@ -97,6 +98,12 @@ export default function PerfilPage() {
           <div>
             <h2 className="text-xl font-bold text-white mb-4">Estadísticas</h2>
             <StatsGrid stats={stats} isLoading={isLoading} />
+          </div>
+
+          {/* Historial de Pagos */}
+          <div>
+            <h2 className="text-xl font-bold text-white mb-4">Pagos</h2>
+            <PaymentHistory />
           </div>
 
           {/* Progreso + Recientes */}
