@@ -72,41 +72,35 @@ export const CALIFICACION_COLORS: Record<CalificacionSM2, string> = {
   [CalificacionSM2.Perfect]: 'bg-success hover:bg-green-600',
 };
 
-// Materias válidas
+// Materias válidas — 7 áreas del examen de admisión UNSA 2026
 export const MATERIAS = [
-  'biologia',
-  'fisica', 
-  'matematicas',
-  'historia',
-  'geografia',
-  'economia',
-  'civica',
-  'literatura',
-  'razonamiento',
+  'aptitud',
+  'matematica',
+  'ciencias-sociales',
+  'ciencia-tecnologia',
+  'persona-familia',
+  'comunicacion',
+  'ingles',
 ] as const;
 
 export type Materia = typeof MATERIAS[number];
 
 export const MATERIA_LABELS: Record<Materia, string> = {
-  biologia: 'Biología',
-  fisica: 'Física',
-  matematicas: 'Matemáticas',
-  historia: 'Historia',
-  economia: 'Economía',
-  geografia: 'Geografía',
-  civica: 'Cívica',
-  literatura: 'Literatura',
-  razonamiento: 'Razonamiento',
+  aptitud: 'Aptitud Académica',
+  matematica: 'Matemática',
+  'ciencias-sociales': 'Ciencias Sociales',
+  'ciencia-tecnologia': 'Ciencia y Tecnología',
+  'persona-familia': 'Persona y Familia',
+  comunicacion: 'Comunicación',
+  ingles: 'Inglés',
 };
 
 export const MATERIA_COLORS: Record<Materia, string> = {
-  biologia: 'border-l-success',
-  fisica: 'border-l-info',
-  matematicas: 'border-l-info',
-  historia: 'border-l-error',
-  geografia: 'border-l-info',
-  economia: 'border-l-warning',
-  civica: 'border-l-warning',
-  literatura: 'border-l-tertiary',
-  razonamiento: 'border-l-tertiary',
+  aptitud: 'border-l-tertiary',
+  matematica: 'border-l-info',
+  'ciencias-sociales': 'border-l-error',
+  'ciencia-tecnologia': 'border-l-success',
+  'persona-familia': 'border-l-warning',
+  comunicacion: 'border-l-tertiary',
+  ingles: 'border-l-info',
 };

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Footer } from '@/components/layout/Footer';
 
 const LAST_UPDATED = '27 de marzo de 2026';
-const WEBSITE_URL = 'https://combounsa.com'; // TODO: Reemplazar con la URL real
+const WEBSITE_URL = 'https://combounsa.com';
 
 export default function PrivacidadPage() {
   return (

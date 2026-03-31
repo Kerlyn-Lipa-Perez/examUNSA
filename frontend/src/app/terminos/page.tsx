@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Footer } from '@/components/layout/Footer';
 
 const LAST_UPDATED = '27 de marzo de 2026';
-const WEBSITE_URL = 'https://combounsa.com'; // TODO: Reemplazar con la URL 
+const WEBSITE_URL = 'https://combounsa.com';
 
 export default function TerminosPage() {
   return (
@@ -267,7 +267,7 @@ export default function TerminosPage() {
               <p>
                 <strong className="text-white">Correo electrónico:</strong>{' '}
                 <a href="mailto:legal@combounsa.com" className="text-primary hover:underline">
-                  kerlyn.lipa@estudiante.ucsm.edu.pe
+                  legal@combounsa.com
                 </a>
               </p>
               <p>

@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerModule } from '@nestjs/throttler';
+import configuration from './config/configuration';
 import { DatabaseModule } from './database/database.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
@@ -10,6 +11,7 @@ import { SimulacrosModule } from './simulacros/simulacros.module';
 import { FlashcardsModule } from './flashcards/flashcards.module';
 import { PagosModule } from './pagos/pagos.module';
 import { EmailModule } from './email/email.module';
+import { SchedulerModule } from './scheduler/scheduler.module';
 
 @Module({
   imports: [
@@ -17,8 +19,9 @@ import { EmailModule } from './email/email.module';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
+      load: [configuration],
     }),
-    
+
     // Módulo de Base de Datos (Drizzle + PG)
     DatabaseModule,
 
@@ -39,6 +42,7 @@ import { EmailModule } from './email/email.module';
     FlashcardsModule,
     PagosModule,
     EmailModule,
+    SchedulerModule,
   ],
 })
 export class AppModule {}

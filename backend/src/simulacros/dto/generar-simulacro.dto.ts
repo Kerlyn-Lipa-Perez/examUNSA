@@ -1,16 +1,9 @@
 import { IsNotEmpty, IsString, IsIn } from 'class-validator';
+import { MATERIAS_VALIDAS } from '../../shared/constants/materias';
 
 export class GenerarSimulacroDto {
   @IsNotEmpty()
   @IsString()
-  @IsIn([
-    'matematica',
-    'fisica',
-    'quimica',
-    'biologia',
-    'historia',
-    'lenguaje',
-    'razonamiento'
-  ], { message: 'Materia no válida' })
+  @IsIn([...MATERIAS_VALIDAS], { message: 'Materia no válida' })
   materia: string;
 }

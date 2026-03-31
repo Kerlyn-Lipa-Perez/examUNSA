@@ -1,15 +1,20 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { eq, and } from 'drizzle-orm';
 import { DATABASE_CONNECTION } from '../database/database.provider';
 import * as schema from '../database/schema';
 import { UserPreferences } from '../database/schema';
+import { EmailService } from '../email/email.service';
+import { MATERIAS_VALIDAS } from '../shared/constants/materias';
 
 @Injectable()
 export class UsersService {
+  private readonly logger = new Logger(UsersService.name);
+
   constructor(
     @Inject(DATABASE_CONNECTION)
     private db: NodePgDatabase<typeof schema>,
+    private readonly emailService: EmailService,
   ) {}
 
   async findByEmail(email: string) {
@@ -124,8 +129,16 @@ export class UsersService {
     await this.db.delete(schema.flashcardProgress).where(eq(schema.flashcardProgress.userId, userId));
     await this.db.delete(schema.flashcards).where(eq(schema.flashcards.userId, userId));
 
+    // Guardar email antes de eliminar
+    const userEmail = user.email;
+
     // Eliminar usuario
     await this.db.delete(schema.users).where(eq(schema.users.id, userId));
+
+    // Enviar email de confirmación (fire-and-forget, no bloquear respuesta)
+    this.emailService.sendAccountDeletionEmail(userEmail).catch((err) =>
+      this.logger.error(`Error al enviar email de eliminación a ${userEmail}:`, err),
+    );
 
     return { message: 'Cuenta eliminada correctamente' };
   }
@@ -171,9 +184,8 @@ export class UsersService {
 
     // Progress by materia
     const progresoPorMateria: Record<string, { promedio: number; simulacros: number }> = {};
-    const materias = ['biologia', 'fisica', 'matematicas', 'historia', 'geografia', 'economia', 'civica'];
-    
-    for (const materia of materias) {
+
+    for (const materia of MATERIAS_VALIDAS) {
       const materiaResults = simulacros.filter(s => s.materia.toLowerCase() === materia);
       if (materiaResults.length > 0) {
         const promedio = Math.round(materiaResults.reduce((acc, s) => acc + s.puntaje, 0) / materiaResults.length);
