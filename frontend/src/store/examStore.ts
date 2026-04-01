@@ -2,6 +2,7 @@
 import { create } from 'zustand';
 import { Question, UserAnswer, ExamData } from '@/types/simulacro';
 import api from '@/lib/axios';
+import { useAuthStore } from './authStore';
 
 interface ExamState {
   // Exam data
@@ -111,11 +112,14 @@ export const useExamStore = create<ExamState>()((set, get) => ({
     const tiempoUsado = examData.meta.tiempoMinutos * 60 - tiempoRestanteSegundos;
 
     // Build the payload matching GuardarResultadoDto
+    const simulacrosHoy = useAuthStore.getState().user?.simulacrosHoy ?? 0;
+
     const payload = {
       examId: examData.meta.id,
       materia: examData.meta.area,
       puntaje: score.correctas,
       tiempoSegundos: tiempoUsado,
+      simulacrosHoy,
       respuestas: userAnswers.map((a) => {
         const question = examData.preguntas.find((p) => p.id === a.preguntaId);
         return {

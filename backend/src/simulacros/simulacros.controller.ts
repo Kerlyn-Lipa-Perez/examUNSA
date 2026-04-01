@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, UseGuards, Request, Param, NotFoundException } from '@nestjs/common';
+import { Controller, Post, Get, Body, UseGuards, Request, Param, Query, NotFoundException } from '@nestjs/common';
 import { SimulacrosService } from './simulacros.service';
 import { GenerarSimulacroDto } from './dto/generar-simulacro.dto';
 import { GuardarResultadoDto } from './dto/guardar-resultado.dto';
@@ -27,12 +27,25 @@ export class SimulacrosController {
   }
 
   @Get('historial')
-  async historial(@Request() req: any) {
-    return this.simulacrosService.historial(req.user.userId);
+  async historial(
+    @Request() req: any,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    const p = Math.max(1, parseInt(page || '1', 10) || 1);
+    const l = Math.min(50, Math.max(1, parseInt(limit || '10', 10) || 10));
+    return this.simulacrosService.historial(req.user.userId, p, l);
   }
 
   @Get('historial/:examId')
-  async historialPorExamen(@Request() req: any, @Param('examId') examId: string) {
-    return this.simulacrosService.historialPorExamen(req.user.userId, examId);
+  async historialPorExamen(
+    @Request() req: any,
+    @Param('examId') examId: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    const p = Math.max(1, parseInt(page || '1', 10) || 1);
+    const l = Math.min(50, Math.max(1, parseInt(limit || '10', 10) || 10));
+    return this.simulacrosService.historialPorExamen(req.user.userId, examId, p, l);
   }
 }

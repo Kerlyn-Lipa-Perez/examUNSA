@@ -4,6 +4,7 @@ import { eq, desc, sql, and } from 'drizzle-orm';
 import { DATABASE_CONNECTION } from '../database/database.provider';
 import * as schema from '../database/schema';
 import { AiService } from '../ai/ai.service';
+import { RankingService } from '../ranking/ranking.service';
 import { GenerarSimulacroDto } from './dto/generar-simulacro.dto';
 import { GuardarResultadoDto } from './dto/guardar-resultado.dto';
 
@@ -12,6 +13,7 @@ export class SimulacrosService {
   constructor(
     @Inject(DATABASE_CONNECTION) private db: NodePgDatabase<typeof schema>,
     private aiService: AiService,
+    private rankingService: RankingService,
   ) {}
 
   async generar(userId: string, dto: GenerarSimulacroDto) {
@@ -54,60 +56,98 @@ export class SimulacrosService {
       })
       .returning();
 
+    // Calcular y registrar puntos de ranking
+    const puntosRanking = await this.rankingService.registrarPuntosSimulacro(userId, {
+      puntaje: dto.puntaje,
+      totalPreguntas: dto.respuestas.length,
+      simulacrosHoy: dto.simulacrosHoy ?? 0,
+    });
+
     return {
       guardado: true,
       puntaje: resultado.puntaje,
+      ranking: {
+        rpGanados: puntosRanking.total,
+        desglose: puntosRanking.desglose,
+      },
     };
   }
 
-  async historial(userId: string) {
-    const user = await this.db.query.users.findFirst({
-      where: eq(schema.users.id, userId),
-    });
+  async historial(userId: string, page = 1, limit = 10) {
+    const offset = (page - 1) * limit;
 
-    if (!user) throw new ForbiddenException('Usuario no encontrado');
+    const [items, [{ total }]] = await Promise.all([
+      this.db
+        .select({
+          id: schema.simulacroResults.id,
+          examId: schema.simulacroResults.examId,
+          materia: schema.simulacroResults.materia,
+          puntaje: schema.simulacroResults.puntaje,
+          totalPreguntas: schema.simulacroResults.totalPreguntas,
+          createdAt: schema.simulacroResults.createdAt,
+        })
+        .from(schema.simulacroResults)
+        .where(eq(schema.simulacroResults.userId, userId))
+        .orderBy(desc(schema.simulacroResults.createdAt))
+        .limit(limit)
+        .offset(offset),
+      this.db
+        .select({ total: sql<number>`count(*)::int` })
+        .from(schema.simulacroResults)
+        .where(eq(schema.simulacroResults.userId, userId)),
+    ]);
 
-    const limit = user.plan === 'free' ? 1 : 20; // Free solo ve el último, Pro ve 20
-
-    const historial = await this.db
-      .select({
-        id: schema.simulacroResults.id,
-        examId: schema.simulacroResults.examId,
-        materia: schema.simulacroResults.materia,
-        puntaje: schema.simulacroResults.puntaje,
-        totalPreguntas: schema.simulacroResults.totalPreguntas,
-        createdAt: schema.simulacroResults.createdAt,
-      })
-      .from(schema.simulacroResults)
-      .where(eq(schema.simulacroResults.userId, userId))
-      .orderBy(desc(schema.simulacroResults.createdAt))
-      .limit(limit);
-
-    return historial;
+    return {
+      items,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 
-  async historialPorExamen(userId: string, examId: string) {
-    const historial = await this.db
-      .select({
-        id: schema.simulacroResults.id,
-        examId: schema.simulacroResults.examId,
-        materia: schema.simulacroResults.materia,
-        puntaje: schema.simulacroResults.puntaje,
-        totalPreguntas: schema.simulacroResults.totalPreguntas,
-        tiempoSegundos: schema.simulacroResults.tiempoSegundos,
-        createdAt: schema.simulacroResults.createdAt,
-      })
-      .from(schema.simulacroResults)
-      .where(
-        and(
-          eq(schema.simulacroResults.userId, userId),
-          eq(schema.simulacroResults.examId, examId),
-        ),
-      )
-      .orderBy(desc(schema.simulacroResults.createdAt))
-      .limit(10);
+  async historialPorExamen(userId: string, examId: string, page = 1, limit = 10) {
+    const offset = (page - 1) * limit;
 
-    return historial;
+    const [items, [{ total }]] = await Promise.all([
+      this.db
+        .select({
+          id: schema.simulacroResults.id,
+          examId: schema.simulacroResults.examId,
+          materia: schema.simulacroResults.materia,
+          puntaje: schema.simulacroResults.puntaje,
+          totalPreguntas: schema.simulacroResults.totalPreguntas,
+          tiempoSegundos: schema.simulacroResults.tiempoSegundos,
+          createdAt: schema.simulacroResults.createdAt,
+        })
+        .from(schema.simulacroResults)
+        .where(
+          and(
+            eq(schema.simulacroResults.userId, userId),
+            eq(schema.simulacroResults.examId, examId),
+          ),
+        )
+        .orderBy(desc(schema.simulacroResults.createdAt))
+        .limit(limit)
+        .offset(offset),
+      this.db
+        .select({ total: sql<number>`count(*)::int` })
+        .from(schema.simulacroResults)
+        .where(
+          and(
+            eq(schema.simulacroResults.userId, userId),
+            eq(schema.simulacroResults.examId, examId),
+          ),
+        ),
+    ]);
+
+    return {
+      items,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 
   async getResultado(userId: string, resultId: string) {

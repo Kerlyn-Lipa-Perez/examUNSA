@@ -111,6 +111,8 @@ export const usersRelations = relations(users, ({ many }) => ({
   flashcards:       many(flashcards),
   flashcardProgress: many(flashcardProgress),
   pagos:            many(pagos),
+  ranking:          many(userRanking),
+  rankingLogs:      many(rankingLog),
 }));
 
 export const simulacroResultsRelations = relations(simulacroResults, ({ one }) => ({
@@ -131,6 +133,72 @@ export const flashcardProgressRelations = relations(flashcardProgress, ({ one })
   flashcard: one(flashcards, { fields: [flashcardProgress.flashcardId], references: [flashcards.id] }),
 }));
 
+// ─── RANKING ──────────────────────────────────────────────────────────────────
+export const userRanking = pgTable('user_ranking', {
+  id:                     uuid('id').primaryKey().defaultRandom(),
+  userId:                 uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  totalRp:                integer('total_rp').default(0).notNull(),
+  simulacrosCompletados:  integer('simulacros_completados').default(0).notNull(),
+  rachaActual:            integer('racha_actual').default(0).notNull(),
+  rachaMaxima:            integer('racha_maxima').default(0).notNull(),
+  respuestasCorrectas:    integer('respuestas_correctas').default(0).notNull(),
+  respuestasTotales:      integer('respuestas_totales').default(0).notNull(),
+  flashcardsRevisadas:    integer('flashcards_revisadas').default(0).notNull(),
+  ultimoSimulacroAt:      timestamp('ultimo_simulacro_at'),
+  ultimaActividadAt:      timestamp('ultima_actividad_at').defaultNow(),
+  createdAt:              timestamp('created_at').defaultNow().notNull(),
+  updatedAt:              timestamp('updated_at').defaultNow().notNull(),
+}, (table) => ({
+  userIdUnique: uniqueIndex('uq_user_ranking').on(table.userId),
+  totalRpIdx:   index('idx_ranking_total_rp').on(table.totalRp),
+}));
+
+export const rankingLog = pgTable('ranking_log', {
+  id:         uuid('id').primaryKey().defaultRandom(),
+  userId:     uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  accion:     varchar('accion', { length: 50 }).notNull(),
+  rpGanados:  integer('rp_ganados').notNull(),
+  metadata:   jsonb('metadata'),
+  createdAt:  timestamp('created_at').defaultNow().notNull(),
+}, (table) => ({
+  userIdCreatedIdx: index('idx_ranking_log_user_created').on(table.userId, table.createdAt),
+  // Para rankings semanales/mensuales: WHERE created_at >= ?
+  createdAtIdx:     index('idx_ranking_log_created').on(table.createdAt),
+}));
+
+// ─── RELACIONES RANKING ──────────────────────────────────────────────────────
+export const userRankingRelations = relations(userRanking, ({ one }) => ({
+  user: one(users, { fields: [userRanking.userId], references: [users.id] }),
+}));
+
+export const rankingLogRelations = relations(rankingLog, ({ one }) => ({
+  user: one(users, { fields: [rankingLog.userId], references: [users.id] }),
+}));
+
+// Agregar a usersRelations existente
+// (se actualiza más abajo con las nuevas relaciones)
+
+// ─── AI ANALYSIS CACHE ─────────────────────────────────────────────────────
+export const aiAnalysisCache = pgTable(
+  'ai_analysis_cache',
+  {
+    id:                      uuid('id').primaryKey().defaultRandom(),
+    userId:                  uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    tipo:                    varchar('tipo', { length: 30 }).notNull(), // 'errores_patron'
+    resultado:               jsonb('resultado').notNull(),
+    simulacrosCountAlMomento: integer('simulacros_count_al_momento').notNull(),
+    expiresAt:               timestamp('expires_at').notNull(),
+    createdAt:               timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => ({
+    userTipoUnique: uniqueIndex('uq_ai_cache_user_tipo').on(table.userId, table.tipo),
+  }),
+);
+
+export const aiAnalysisCacheRelations = relations(aiAnalysisCache, ({ one }) => ({
+  user: one(users, { fields: [aiAnalysisCache.userId], references: [users.id] }),
+}));
+
 // ─── TIPOS INFERIDOS (usar en los servicios en lugar de interfaces manuales) ──
 export type User              = typeof users.$inferSelect;
 export type NewUser           = typeof users.$inferInsert;
@@ -141,3 +209,9 @@ export type NewFlashcard      = typeof flashcards.$inferInsert;
 export type FlashcardProgress = typeof flashcardProgress.$inferSelect;
 export type Pago              = typeof pagos.$inferSelect;
 export type NewPago           = typeof pagos.$inferInsert;
+export type UserRanking       = typeof userRanking.$inferSelect;
+export type NewUserRanking    = typeof userRanking.$inferInsert;
+export type RankingLog        = typeof rankingLog.$inferSelect;
+export type NewRankingLog     = typeof rankingLog.$inferInsert;
+export type AiAnalysisCache   = typeof aiAnalysisCache.$inferSelect;
+export type NewAiAnalysisCache = typeof aiAnalysisCache.$inferInsert;

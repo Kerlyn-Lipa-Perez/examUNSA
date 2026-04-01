@@ -3,9 +3,10 @@ import { FlashcardsService } from './flashcards.service';
 import { FlashcardsController } from './flashcards.controller';
 import { Sm2Service } from './sm2.service';
 import { AiModule } from '../ai/ai.module';
+import { RankingModule } from '../ranking/ranking.module';
 
 @Module({
-  imports: [AiModule],
+  imports: [AiModule, RankingModule],
   controllers: [FlashcardsController],
   providers: [FlashcardsService, Sm2Service],
 })

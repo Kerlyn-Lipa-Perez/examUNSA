@@ -13,6 +13,14 @@ interface HistorialItem {
   createdAt: string;
 }
 
+interface HistorialResponse {
+  items: HistorialItem[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
 function timeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
@@ -31,9 +39,9 @@ export function LastSimulacro() {
 
   useEffect(() => {
     api
-      .get<HistorialItem[]>('/simulacros/historial')
+      .get<HistorialResponse>('/simulacros/historial?limit=1')
       .then((res) => {
-        if (res.data.length > 0) setData(res.data[0]);
+        if (res.data.items.length > 0) setData(res.data.items[0]);
       })
       .catch(() => setError(true))
       .finally(() => setLoading(false));

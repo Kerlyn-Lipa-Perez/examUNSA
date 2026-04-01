@@ -143,25 +143,98 @@ describe('SimulacrosService', () => {
 
   // ======= HISTORIAL =======
   describe('historial', () => {
-    it('debe retornar historial limitado para usuario free', async () => {
-      dbMock.query.users.findFirst.mockResolvedValue(mockUserFree);
-      dbMock.limit.mockResolvedValue([
-        { id: 'r1', materia: 'matematica', puntaje: 10 },
-      ]);
+    it('debe retornar historial paginado con items, total y metadata', async () => {
+      const mockItems = [
+        { id: 'r1', materia: 'matematica', puntaje: 10, examId: 'e1', totalPreguntas: 20, createdAt: new Date() },
+        { id: 'r2', materia: 'fisica', puntaje: 15, examId: 'e2', totalPreguntas: 20, createdAt: new Date() },
+      ];
 
-      const result = await service.historial('user-123');
+      // Mock: select().from().where().orderBy().limit().offset() → items
+      // y select().from().where() → [{ total: 12 }]
+      let callCount = 0;
+      dbMock.limit = jest.fn().mockImplementation(function () {
+        callCount++;
+        if (callCount === 1) return this; // primera llamada: limit() retorna chain
+        return mockItems; // segunda llamada (offset): retorna items
+      });
+      dbMock.offset = jest.fn().mockResolvedValue(mockItems);
 
-      // Free solo ve 1 resultado
-      expect(dbMock.limit).toHaveBeenCalledWith(1);
+      // Para el count, el segundo Promise.all item es un select sin limit/offset
+      const originalWhere = dbMock.where;
+      dbMock.where = jest.fn().mockImplementation(function () {
+        return { ...this, then: undefined, catch: undefined };
+      });
+
+      // Simular que Promise.all recibe [items, [{ total }]]
+      // Necesitamos mockear las dos ramas del Promise.all
+      const mockCountResult = [{ total: 12 }];
+
+      // Re-mock del select para que se comporte diferente según el contexto
+      let selectCall = 0;
+      dbMock.select = jest.fn().mockImplementation(() => {
+        selectCall++;
+        if (selectCall === 1) {
+          // Primera llamada: query de items
+          return {
+            from: jest.fn().mockReturnValue({
+              where: jest.fn().mockReturnValue({
+                orderBy: jest.fn().mockReturnValue({
+                  limit: jest.fn().mockReturnValue({
+                    offset: jest.fn().mockResolvedValue(mockItems),
+                  }),
+                }),
+              }),
+            }),
+          };
+        }
+        // Segunda llamada: query de count
+        return {
+          from: jest.fn().mockReturnValue({
+            where: jest.fn().mockResolvedValue(mockCountResult),
+          }),
+        };
+      });
+
+      const result = await service.historial('user-123', 1, 10);
+
+      expect(result.items).toEqual(mockItems);
+      expect(result.total).toBe(12);
+      expect(result.page).toBe(1);
+      expect(result.limit).toBe(10);
+      expect(result.totalPages).toBe(2);
     });
 
-    it('debe retornar hasta 20 para usuario Pro', async () => {
-      dbMock.query.users.findFirst.mockResolvedValue(mockUserPro);
-      dbMock.limit.mockResolvedValue([]);
+    it('debe paginar correctamente con page=2, limit=5', async () => {
+      const mockItems = [{ id: 'r6', materia: 'historia', puntaje: 8, examId: null, totalPreguntas: 20, createdAt: new Date() }];
 
-      await service.historial('user-789');
+      let selectCall = 0;
+      dbMock.select = jest.fn().mockImplementation(() => {
+        selectCall++;
+        if (selectCall === 1) {
+          return {
+            from: jest.fn().mockReturnValue({
+              where: jest.fn().mockReturnValue({
+                orderBy: jest.fn().mockReturnValue({
+                  limit: jest.fn().mockReturnValue({
+                    offset: jest.fn().mockResolvedValue(mockItems),
+                  }),
+                }),
+              }),
+            }),
+          };
+        }
+        return {
+          from: jest.fn().mockReturnValue({
+            where: jest.fn().mockResolvedValue([{ total: 11 }]),
+          }),
+        };
+      });
 
-      expect(dbMock.limit).toHaveBeenCalledWith(20);
+      const result = await service.historial('user-123', 2, 5);
+
+      expect(result.page).toBe(2);
+      expect(result.limit).toBe(5);
+      expect(result.totalPages).toBe(3);
     });
   });
 });

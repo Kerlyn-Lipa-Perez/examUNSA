@@ -12,6 +12,8 @@ import { FlashcardsModule } from './flashcards/flashcards.module';
 import { PagosModule } from './pagos/pagos.module';
 import { EmailModule } from './email/email.module';
 import { SchedulerModule } from './scheduler/scheduler.module';
+import { RankingModule } from './ranking/ranking.module';
+import { EstadisticasModule } from './estadisticas/estadisticas.module';
 
 @Module({
   imports: [
@@ -43,6 +45,8 @@ import { SchedulerModule } from './scheduler/scheduler.module';
     PagosModule,
     EmailModule,
     SchedulerModule,
+    RankingModule,
+    EstadisticasModule,
   ],
 })
 export class AppModule {}

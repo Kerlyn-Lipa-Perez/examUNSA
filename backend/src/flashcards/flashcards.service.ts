@@ -1,10 +1,11 @@
 import { Injectable, Inject, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { eq, and, lte, isNull, or } from 'drizzle-orm';
+import { eq, and, lte, isNull, or, sql, notExists, count } from 'drizzle-orm';
 import { DATABASE_CONNECTION } from '../database/database.provider';
 import * as schema from '../database/schema';
 import { AiService } from '../ai/ai.service';
 import { Sm2Service, Sm2State } from './sm2.service';
+import { RankingService } from '../ranking/ranking.service';
 import { GenerarCardsDto } from './dto/generar-cards.dto';
 import { RevisarCardDto } from './dto/revisar-card.dto';
 
@@ -14,6 +15,7 @@ export class FlashcardsService {
     @Inject(DATABASE_CONNECTION) private db: NodePgDatabase<typeof schema>,
     private aiService: AiService,
     private sm2Service: Sm2Service,
+    private rankingService: RankingService,
   ) {}
 
   async getCardsHoy(userId: string) {
@@ -24,8 +26,9 @@ export class FlashcardsService {
     if (!user) throw new ForbiddenException('Usuario no encontrado');
 
     const limit = user.plan === 'free' ? 20 : 1000;
+    const today = new Date().toISOString().split('T')[0];
 
-    // Buscar tarjetas pendientes (SM-2 dice que proximaRevision <= hoy)
+    // 1. Tarjetas pendientes (SM-2: proxima_revision <= hoy)
     const pendientes = await this.db
       .select({
         id: schema.flashcards.id,
@@ -41,55 +44,55 @@ export class FlashcardsService {
       .where(
         and(
           eq(schema.flashcardProgress.userId, userId),
-          lte(schema.flashcardProgress.proximaRevision, new Date().toISOString().split('T')[0]),
+          lte(schema.flashcardProgress.proximaRevision, today),
         ),
       )
       .limit(limit);
 
-    // Si no hay suficientes pendientes, buscar nuevas tarjetas del sistema (o propias) que el usuario no ha visto
-    if (pendientes.length < limit) {
-      const remaining = limit - pendientes.length;
-      
-      // Obtener todas las que el usuario ya tiene en progreso
-      const enProgreso = await this.db.select({ flashcardId: schema.flashcardProgress.flashcardId })
-        .from(schema.flashcardProgress)
-        .where(eq(schema.flashcardProgress.userId, userId));
-      
-      const enProgresoIds = enProgreso.map(p => p.flashcardId);
-
-      // Buscar tarjetas disponibles que no estén en progreso
-      let whereCondition;
-      if (enProgresoIds.length > 0) {
-        whereCondition = and(
-          or(isNull(schema.flashcards.userId), eq(schema.flashcards.userId, userId)),
-          // NOT IN no es tan directo en query builder básico a veces sin raw sql, 
-          // usaremos un enfoque simplificado asumiendo un subset
-        );
-      } else {
-        whereCondition = or(isNull(schema.flashcards.userId), eq(schema.flashcards.userId, userId));
-      }
-
-      const nuevas = await this.db.query.flashcards.findMany({
-        where: whereCondition,
-        limit: remaining * 2, // Buscamos más por si filtramos localmente
-      });
-
-      const nuevasFiltradas = nuevas.filter(c => !enProgresoIds.includes(c.id)).slice(0, remaining);
-      
-      return {
-        cards: [...pendientes, ...nuevasFiltradas.map(c => ({
-          id: c.id,
-          pregunta: c.pregunta,
-          respuesta: c.respuesta,
-          materia: c.materia
-        }))],
-        total: pendientes.length + nuevasFiltradas.length,
-      };
+    if (pendientes.length >= limit) {
+      return { cards: pendientes, total: pendientes.length };
     }
 
+    // 2. Nuevas: flashcards que el usuario NO tiene en progreso (SQL, no JS)
+    const remaining = limit - pendientes.length;
+
+    const pendientesIds = pendientes.map(p => p.id);
+
+    const nuevas = await this.db
+      .select({
+        id: schema.flashcards.id,
+        pregunta: schema.flashcards.pregunta,
+        respuesta: schema.flashcards.respuesta,
+        materia: schema.flashcards.materia,
+      })
+      .from(schema.flashcards)
+      .where(
+        and(
+          // Del sistema (null) o propias del usuario
+          or(isNull(schema.flashcards.userId), eq(schema.flashcards.userId, userId)),
+          // Excluir las que ya están pendientes en esta carga
+          pendientesIds.length > 0
+            ? sql`${schema.flashcards.id} NOT IN (${sql.join(pendientesIds, sql.raw(', '))})`
+            : sql`TRUE`,
+          // Excluir las que ya tienen progreso (subquery SQL)
+          notExists(
+            this.db
+              .select({ id: schema.flashcardProgress.id })
+              .from(schema.flashcardProgress)
+              .where(
+                and(
+                  eq(schema.flashcardProgress.userId, userId),
+                  eq(schema.flashcardProgress.flashcardId, schema.flashcards.id),
+                ),
+              ),
+          ),
+        ),
+      )
+      .limit(remaining);
+
     return {
-      cards: pendientes,
-      total: pendientes.length,
+      cards: [...pendientes, ...nuevas],
+      total: pendientes.length + nuevas.length,
     };
   }
 
@@ -141,6 +144,22 @@ export class FlashcardsService {
         },
       });
 
+    // Contar cuántas flashcards ha revisado hoy (proxima_revision <= hoy)
+    const today = new Date().toISOString().split('T')[0];
+    const [hoyResult] = await this.db
+      .select({ total: count() })
+      .from(schema.flashcardProgress)
+      .where(
+        and(
+          eq(schema.flashcardProgress.userId, userId),
+          lte(schema.flashcardProgress.proximaRevision, today),
+        ),
+      );
+    const revisadasHoy = Number(hoyResult.total);
+
+    // Registrar puntos de ranking si aplica hito (10 o 50)
+    await this.rankingService.registrarPuntosFlashcards(userId, revisadasHoy);
+
     return {
       proximaRevision,
       intervaloDias: siguienteEstado.intervaloDias,
@@ -175,47 +194,45 @@ export class FlashcardsService {
   async stats(userId: string) {
     const today = new Date().toISOString().split('T')[0];
 
-    // Tarjetas del usuario (creadas por él)
-    const userCards = await this.db.query.flashcards.findMany({
-      where: eq(schema.flashcards.userId, userId),
-    });
+    // Total de tarjetas en progreso del usuario (1 query con COUNT)
+    const [totalResult] = await this.db
+      .select({ total: count() })
+      .from(schema.flashcardProgress)
+      .where(eq(schema.flashcardProgress.userId, userId));
 
-    // Progreso del usuario (tarjetas que ha estudiado)
-    const progress = await this.db.query.flashcardProgress.findMany({
-      where: eq(schema.flashcardProgress.userId, userId),
-    });
+    // Estudiadas hoy (proxima_revision <= hoy = fue revisada hoy o antes)
+    const [hoyResult] = await this.db
+      .select({ total: count() })
+      .from(schema.flashcardProgress)
+      .where(
+        and(
+          eq(schema.flashcardProgress.userId, userId),
+          lte(schema.flashcardProgress.proximaRevision, today),
+        ),
+      );
 
-    // Estudiadas hoy: progreso con proximaRevision actualizada hoy
-    const estudiadasHoy = progress.filter(p => p.proximaRevision <= today).length;
+    // Contar por materia: JOIN flashcard_progress con flashcards y GROUP BY materia
+    const porMateriaRows = await this.db
+      .select({
+        materia: schema.flashcards.materia,
+        total: count(),
+      })
+      .from(schema.flashcardProgress)
+      .innerJoin(
+        schema.flashcards,
+        eq(schema.flashcardProgress.flashcardId, schema.flashcards.id),
+      )
+      .where(eq(schema.flashcardProgress.userId, userId))
+      .groupBy(schema.flashcards.materia);
 
-    // Contar por materia
     const porMateria: Record<string, number> = {};
-    for (const card of userCards) {
-      porMateria[card.materia] = (porMateria[card.materia] || 0) + 1;
+    for (const row of porMateriaRows) {
+      porMateria[row.materia] = Number(row.total);
     }
-
-    // También incluir tarjetas del sistema que el usuario ha estudiado
-    const systemCards = await this.db.query.flashcards.findMany({
-      where: isNull(schema.flashcards.userId),
-    });
-
-    // Agregar tarjetas del sistema al conteo por materia
-    for (const card of systemCards) {
-      // Verificar si el usuario tiene progreso con esta tarjeta del sistema
-      const hasProgress = progress.some(p => p.flashcardId === card.id);
-      if (hasProgress) {
-        porMateria[card.materia] = (porMateria[card.materia] || 0) + 1;
-      }
-    }
-
-    // Total: tarjetas propias + tarjetas del sistema con progreso
-    const totalCards = userCards.length + progress.filter(p => {
-      return systemCards.some(c => c.id === p.flashcardId);
-    }).length;
 
     return {
-      totalCards,
-      estudiadasHoy,
+      totalCards: Number(totalResult.total),
+      estudiadasHoy: Number(hoyResult.total),
       streak: 0,
       porMateria,
     };

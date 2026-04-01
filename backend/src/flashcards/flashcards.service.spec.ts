@@ -35,6 +35,7 @@ describe('FlashcardsService', () => {
       from: jest.fn().mockReturnThis(),
       innerJoin: jest.fn().mockReturnThis(),
       where: jest.fn().mockReturnThis(),
+      groupBy: jest.fn().mockResolvedValue([]),
       limit: jest.fn().mockResolvedValue([]),
       insert: jest.fn().mockReturnThis(),
       values: jest.fn().mockReturnThis(),
@@ -152,6 +153,188 @@ describe('FlashcardsService', () => {
       await expect(
         service.revisar('user-123', 'no-existe', { calificacion: 3 }),
       ).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  // ======= STATS =======
+  describe('stats', () => {
+    it('debe retornar totalCards, estudiadasHoy y porMateria usando COUNT', async () => {
+      // Mock: primera llamada select → count total progreso
+      // segunda llamada select → count estudiadas hoy
+      // tercera llamada select → group by materia
+      let selectCall = 0;
+      dbMock.select = jest.fn().mockImplementation(() => {
+        selectCall++;
+        if (selectCall === 1) {
+          // Total progreso
+          return {
+            from: jest.fn().mockReturnValue({
+              where: jest.fn().mockResolvedValue([{ total: 15 }]),
+            }),
+          };
+        }
+        if (selectCall === 2) {
+          // Estudiadas hoy
+          return {
+            from: jest.fn().mockReturnValue({
+              where: jest.fn().mockResolvedValue([{ total: 3 }]),
+            }),
+          };
+        }
+        // Por materia (group by)
+        return {
+          from: jest.fn().mockReturnValue({
+            innerJoin: jest.fn().mockReturnValue({
+              where: jest.fn().mockReturnValue({
+                groupBy: jest.fn().mockResolvedValue([
+                  { materia: 'matematica', total: 8 },
+                  { materia: 'fisica', total: 7 },
+                ]),
+              }),
+            }),
+          }),
+        };
+      });
+
+      const result = await service.stats('user-123');
+
+      expect(result.totalCards).toBe(15);
+      expect(result.estudiadasHoy).toBe(3);
+      expect(result.porMateria).toEqual({
+        matematica: 8,
+        fisica: 7,
+      });
+    });
+
+    it('debe retornar ceros si el usuario no tiene progreso', async () => {
+      let selectCall = 0;
+      dbMock.select = jest.fn().mockImplementation(() => {
+        selectCall++;
+        return {
+          from: jest.fn().mockReturnValue({
+            where: jest.fn().mockReturnValue({
+              innerJoin: jest.fn().mockReturnValue({
+                where: jest.fn().mockReturnValue({
+                  groupBy: jest.fn().mockResolvedValue([]),
+                }),
+              }),
+              groupBy: jest.fn().mockResolvedValue([]),
+              mockResolvedValue: undefined,
+            }),
+            mockResolvedValue: [{ total: 0 }],
+          }),
+        };
+      });
+
+      // Simplificar: mockear directamente los 3 counts
+      dbMock.select = jest.fn().mockReturnValue({
+        from: jest.fn().mockReturnValue({
+          where: jest.fn().mockImplementation(function () {
+            return { then: (resolve: any) => resolve([{ total: 0 }]) };
+          }),
+          innerJoin: jest.fn().mockReturnValue({
+            where: jest.fn().mockReturnValue({
+              groupBy: jest.fn().mockResolvedValue([]),
+            }),
+          }),
+        }),
+      });
+
+      const result = await service.stats('user-123');
+
+      expect(result.totalCards).toBe(0);
+      expect(result.estudiadasHoy).toBe(0);
+      expect(result.porMateria).toEqual({});
+    });
+  });
+
+  // ======= GET CARDS HOY =======
+  describe('getCardsHoy', () => {
+    it('debe retornar tarjetas pendientes del usuario', async () => {
+      dbMock.query.users.findFirst.mockResolvedValue(mockUserPro);
+
+      const pendientes = [
+        { id: 'card-1', pregunta: 'P1', respuesta: 'R1', materia: 'matematica' },
+        { id: 'card-2', pregunta: 'P2', respuesta: 'R2', materia: 'fisica' },
+      ];
+
+      // Mock: primera select → pendientes (innerJoin)
+      // segunda select → nuevas (notExists)
+      let selectCall = 0;
+      dbMock.select = jest.fn().mockImplementation(() => {
+        selectCall++;
+        if (selectCall === 1) {
+          return {
+            from: jest.fn().mockReturnValue({
+              innerJoin: jest.fn().mockReturnValue({
+                where: jest.fn().mockReturnValue({
+                  limit: jest.fn().mockResolvedValue(pendientes),
+                }),
+              }),
+            }),
+          };
+        }
+        // Nuevas (notExists)
+        return {
+          from: jest.fn().mockReturnValue({
+            where: jest.fn().mockReturnValue({
+              limit: jest.fn().mockResolvedValue([]),
+            }),
+          }),
+        };
+      });
+
+      const result = await service.getCardsHoy('user-456');
+
+      expect(result.cards).toEqual(pendientes);
+      expect(result.total).toBe(2);
+    });
+
+    it('debe buscar nuevas si hay menos pendientes que el límite', async () => {
+      dbMock.query.users.findFirst.mockResolvedValue(mockUserFree);
+
+      const pendientes = [
+        { id: 'card-1', pregunta: 'P1', respuesta: 'R1', materia: 'matematica' },
+      ];
+
+      const nuevas = [
+        { id: 'card-new', pregunta: 'Nueva', respuesta: 'Resp', materia: 'fisica' },
+      ];
+
+      let selectCall = 0;
+      dbMock.select = jest.fn().mockImplementation(() => {
+        selectCall++;
+        if (selectCall === 1) {
+          return {
+            from: jest.fn().mockReturnValue({
+              innerJoin: jest.fn().mockReturnValue({
+                where: jest.fn().mockReturnValue({
+                  limit: jest.fn().mockResolvedValue(pendientes),
+                }),
+              }),
+            }),
+          };
+        }
+        return {
+          from: jest.fn().mockReturnValue({
+            where: jest.fn().mockReturnValue({
+              limit: jest.fn().mockResolvedValue(nuevas),
+            }),
+          }),
+        };
+      });
+
+      const result = await service.getCardsHoy('user-123');
+
+      expect(result.cards).toHaveLength(2);
+      expect(result.cards[0].id).toBe('card-1');
+      expect(result.cards[1].id).toBe('card-new');
+    });
+
+    it('debe lanzar ForbiddenException si el usuario no existe', async () => {
+      dbMock.query.users.findFirst.mockResolvedValue(null);
+
+      await expect(service.getCardsHoy('no-existe')).rejects.toThrow(ForbiddenException);
     });
   });
 

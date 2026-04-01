@@ -54,10 +54,11 @@ export function Sidebar() {
           </svg>
           Flashcards
         </Link>
-        <Link href="/cursos" className={getLinkClass('/cursos')}>
+        {/*<Link href="/cursos" className={getLinkClass('/cursos')}>
           <SVGIcon name="cursos" />
           Cursos
         </Link>
+        */}
         <Link href="/ranking" className={getLinkClass('/ranking')}>
           <SVGIcon name="ranking" />
           Ranking
@@ -78,12 +79,7 @@ export function Sidebar() {
         </Link>
       </nav>
 
-      <div className="p-4 mb-4">
-        <Link href="/plan-estudio" className={getLinkClass('/plan-estudio')}>
-          <SVGIcon name="calendar" className="w-4 h-4" />
-          Plan de Estudio
-        </Link>
-      </div>
+      
     </aside>
   );
 }
