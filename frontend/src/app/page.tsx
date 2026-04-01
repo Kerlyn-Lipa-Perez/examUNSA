@@ -15,6 +15,8 @@ import {
   GraduationCap,
   Clock,
   Check,
+  Crown,
+  X,
 } from 'lucide-react';
 
 export default function LandingPage() {
@@ -37,6 +39,7 @@ export default function LandingPage() {
               { label: 'Simulacros', href: '#simulacros' },
               { label: 'Método', href: '#metodo' },
               { label: 'Materias', href: '#materias' },
+              { label: 'Precios', href: '#precios' },
             ].map((item) => (
               <a
                 key={item.label}
@@ -65,9 +68,9 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      <main className="pt-16">
+      <main className="pt-19">
         {/* ─── Hero ──────────────────────────────────────────────────── */}
-        <section className="relative min-h-[90vh] flex items-center overflow-hidden">
+        <section className="relative min-h-[90vh] flex items-start pt-16 lg:pt-24 overflow-hidden">
           {/* Static ambient gradient */}
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_0%,rgba(212,160,23,0.06),transparent)] pointer-events-none" />
           {/* Subtle grid */}
@@ -429,6 +432,109 @@ export default function LandingPage() {
           </div>
         </section>
 
+        {/* ─── Pricing ──────────────────────────────────────────────────── */}
+        <section className="py-28 relative" id="precios">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_50%_50%,rgba(212,160,23,0.04),transparent)] pointer-events-none" />
+
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div className="text-center mb-16">
+              <span className="text-xs font-bold text-primary uppercase tracking-[0.25em] mb-4 block">Precios</span>
+              <h2 className="text-3xl lg:text-4xl font-bold mb-4">
+                Elige tu camino hacia la <span className="text-primary">vacante</span>
+              </h2>
+              <p className="text-[#9CA3AF] text-lg max-w-xl mx-auto leading-relaxed">
+                Empieza gratis. Cuando estés listo, desbloquea todo el poder de la IA.
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+              {/* Plan Free */}
+              <div className="relative p-8 rounded-2xl bg-neutral-800/60 border border-white/5 hover:border-white/10 transition-all duration-300">
+                <div className="mb-8">
+                  <span className="text-xs font-bold text-[#8B949E] uppercase tracking-[0.15em]">Plan</span>
+                  <h3 className="text-2xl font-bold text-white mt-2">Free</h3>
+                  <div className="mt-4 flex items-baseline gap-1">
+                    <span className="font-mono text-4xl font-bold text-white">S/ 0</span>
+                    <span className="text-sm text-[#8B949E]">/ mes</span>
+                  </div>
+                </div>
+
+                <ul className="space-y-4 mb-8">
+                  {[
+                    { text: '3 simulacros por día', included: true },
+                    { text: '20 flashcards', included: true },
+                    { text: 'Historial del último simulacro', included: true },
+                    { text: 'Simulacros IA ilimitados', included: false },
+                    { text: 'Flashcards ilimitadas con IA', included: false },
+                    { text: 'Tutor IA integrado', included: false },
+                    { text: 'Análisis predictivo de ingreso', included: false },
+                  ].map((item) => (
+                    <li key={item.text} className="flex items-center gap-3">
+                      {item.included ? (
+                        <Check className="w-4 h-4 text-success flex-shrink-0" />
+                      ) : (
+                        <X className="w-4 h-4 text-neutral-600 flex-shrink-0" />
+                      )}
+                      <span className={`text-sm ${item.included ? 'text-gray-300' : 'text-neutral-600'}`}>
+                        {item.text}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+
+                <Link
+                  href="/registro"
+                  className="block w-full px-6 py-3.5 text-center rounded-xl font-bold text-sm border border-neutral-border text-[#8B949E] hover:text-white hover:border-white/20 transition-all"
+                >
+                  Comenzar gratis
+                </Link>
+              </div>
+
+              {/* Plan Pro — Destacado */}
+              <div className="relative p-8 rounded-2xl bg-neutral-800/90 border-2 border-primary/40 hover:border-primary/60 transition-all duration-300 shadow-xl shadow-primary/5">
+                {/* Badge destacado */}
+                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-primary text-neutral-900 text-xs font-bold flex items-center gap-1.5">
+                  <Crown className="w-3.5 h-3.5" />
+                  MÁS POPULAR
+                </div>
+
+                <div className="mb-8 pt-2">
+                  <span className="text-xs font-bold text-primary uppercase tracking-[0.15em]">Plan</span>
+                  <h3 className="text-2xl font-bold text-white mt-2">Pro</h3>
+                  <div className="mt-4 flex items-baseline gap-1">
+                    <span className="font-mono text-4xl font-bold text-primary">S/ 29.90</span>
+                    <span className="text-sm text-[#8B949E]">/ mes</span>
+                  </div>
+                </div>
+
+                <ul className="space-y-4 mb-8">
+                  {[
+                    'Simulacros IA ilimitados',
+                    'Flashcards ilimitadas con IA',
+                    'Tutor IA integrado',
+                    'Análisis predictivo de ingreso',
+                    'Historial completo (20 simulacros)',
+                    'Modo examen real CEPRUNSA',
+                    'Soporte prioritario',
+                  ].map((text) => (
+                    <li key={text} className="flex items-center gap-3">
+                      <Check className="w-4 h-4 text-primary flex-shrink-0" />
+                      <span className="text-sm text-gray-200">{text}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <Link
+                  href="/registro"
+                  className="block w-full px-6 py-3.5 text-center rounded-xl font-bold text-sm bg-primary text-neutral-900 hover:bg-yellow-600 transition-all shadow-lg shadow-primary/20 hover:shadow-primary/40"
+                >
+                  Empezar prueba Pro
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* ─── CTA ───────────────────────────────────────────────────── */}
         <section className="py-28 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-b from-neutral-900 via-neutral-800/30 to-neutral-900 pointer-events-none" />
@@ -441,7 +547,7 @@ export default function LandingPage() {
               esperar <span className="text-primary">para siempre</span>
             </h2>
             <p className="text-xl text-[#9CA3AF] mb-12 max-w-xl mx-auto leading-relaxed">
-              Únete a 1,200+ estudiantes que ya usan Combo UNSA para prepararse con inteligencia.
+              Únete a los +12 000 estudiantes que ingresan a la UNSA.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link

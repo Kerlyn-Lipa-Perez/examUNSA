@@ -30,6 +30,7 @@ services:
       DATABASE_PASSWORD: secret
       JWT_SECRET: ${JWT_SECRET}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
+      CULQI_PUBLIC_KEY: ${CULQI_PUBLIC_KEY}
       CULQI_SECRET_KEY: ${CULQI_SECRET_KEY}
       RESEND_API_KEY: ${RESEND_API_KEY}
       FRONTEND_URL: http://localhost:3000
@@ -38,7 +39,9 @@ services:
       db:
         condition: service_healthy
     volumes:
-      - ./backend/src:/app/src   # hot reload con ts-node en dev
+      - ./backend/src:/app/src
+      - ./backend/tsconfig.json:/app/tsconfig.json
+    command: pnpm start:dev
 
   frontend:
     build:

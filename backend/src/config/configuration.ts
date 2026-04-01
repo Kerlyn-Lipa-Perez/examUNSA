@@ -22,6 +22,7 @@ export default () => ({
 
   culqi: {
     publicKey: process.env.CULQI_PUBLIC_KEY,
+    secretKey: process.env.CULQI_SECRET_KEY,
   },
 
   resend: {

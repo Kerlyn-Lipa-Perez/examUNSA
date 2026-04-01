@@ -3,11 +3,16 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/axios';
 
 interface CheckoutResponse {
-  checkoutUrl: string;
   publicKey: string | undefined;
   amount: number;
   currency: string;
   email: string;
+}
+
+interface ConfirmarPagoResponse {
+  success: boolean;
+  message: string;
+  cargoId: string;
 }
 
 interface PagoHistorial {
@@ -21,18 +26,29 @@ interface PagoHistorial {
   createdAt: string;
 }
 
-// POST /pagos/checkout — iniciar flujo de pago
+// POST /pagos/checkout — obtener datos para CulqiCheckout
 export function useCheckout() {
-  const queryClient = useQueryClient();
-
   return useMutation<CheckoutResponse, Error, string>({
     mutationFn: async (planId: string) => {
       const { data } = await api.post<CheckoutResponse>('/pagos/checkout', { planId });
       return data;
     },
+  });
+}
+
+// POST /pagos/confirmar — enviar token al backend para crear cargo real
+export function useConfirmarPago() {
+  const queryClient = useQueryClient();
+
+  return useMutation<ConfirmarPagoResponse, Error, string>({
+    mutationFn: async (tokenId: string) => {
+      const { data } = await api.post<ConfirmarPagoResponse>('/pagos/confirmar', { tokenId });
+      return data;
+    },
     onSuccess: () => {
-      // Invalidar auth para refrescar plan del usuario
+      // Refrescar datos del usuario para que refleje el plan Pro
       queryClient.invalidateQueries({ queryKey: ['user'] });
+      queryClient.invalidateQueries({ queryKey: ['pagos', 'historial'] });
     },
   });
 }

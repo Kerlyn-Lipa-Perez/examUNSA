@@ -2,7 +2,7 @@
 import {
   pgTable, uuid, varchar, integer, real,
   boolean, text, jsonb, date, timestamp,
-  uniqueIndex,
+  uniqueIndex, index,
 } from 'drizzle-orm/pg-core';
 import { relations, sql } from 'drizzle-orm';
 
@@ -48,7 +48,12 @@ export const simulacroResults = pgTable('simulacro_results', {
   // [{preguntaIdx, elegida, correcta}]
   respuestas:     jsonb('respuestas').notNull(),
   createdAt:      timestamp('created_at').defaultNow().notNull(),
-});
+}, (table) => ({
+  // Historial: WHERE user_id = ? ORDER BY created_at DESC
+  userIdCreatedIdx: index('idx_simulacro_user_created').on(table.userId, table.createdAt),
+  // Historial por examen: WHERE user_id = ? AND exam_id = ?
+  userIdExamIdx: index('idx_simulacro_user_exam').on(table.userId, table.examId),
+}));
 
 // ─── FLASHCARDS ───────────────────────────────────────────────────────────────
 export const flashcards = pgTable('flashcards', {
@@ -60,7 +65,10 @@ export const flashcards = pgTable('flashcards', {
   respuesta: text('respuesta').notNull(),
   esPublica: boolean('es_publica').default(false).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
-});
+}, (table) => ({
+  // Filtrar flashcards del usuario: WHERE user_id = ?
+  userIdIdx: index('idx_flashcard_user').on(table.userId),
+}));
 
 // ─── FLASHCARD PROGRESS (SM-2) ────────────────────────────────────────────────
 export const flashcardProgress = pgTable(
@@ -77,6 +85,8 @@ export const flashcardProgress = pgTable(
   (table) => ({
     // Un alumno tiene un solo registro de progreso por flashcard
     uniqUserCard: uniqueIndex('uq_user_card').on(table.userId, table.flashcardId),
+    // Cards pendientes: WHERE user_id = ? AND proxima_revision <= ?
+    userIdRevisionIdx: index('idx_progress_user_revision').on(table.userId, table.proximaRevision),
   }),
 );
 
@@ -84,13 +94,16 @@ export const flashcardProgress = pgTable(
 export const pagos = pgTable('pagos', {
   id:         uuid('id').primaryKey().defaultRandom(),
   userId:     uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-  monto:      integer('monto').notNull(),          // En céntimos (ej: 2990 = S/29.90)
+  monto:      integer('monto').notNull(),
   moneda:     varchar('moneda', { length: 3 }).default('PEN').notNull(),
-  estado:     varchar('estado', { length: 20 }).default('completado').notNull(), // 'pendiente' | 'completado' | 'fallido'
-  planId:     varchar('plan_id', { length: 20 }).notNull(), // 'free' | 'pro'
-  referencia: varchar('referencia', { length: 100 }),       // ID de Culqi u otra referencia externa
+  estado:     varchar('estado', { length: 20 }).default('completado').notNull(),
+  planId:     varchar('plan_id', { length: 20 }).notNull(),
+  referencia: varchar('referencia', { length: 100 }),
   createdAt:  timestamp('created_at').defaultNow().notNull(),
-});
+}, (table) => ({
+  userIdCreatedIdx: index('idx_pago_user_created').on(table.userId, table.createdAt),
+  referenciaIdx: index('idx_pago_referencia').on(table.referencia),
+}));
 
 // ─── RELACIONES (para joins tipados con Drizzle) ──────────────────────────────
 export const usersRelations = relations(users, ({ many }) => ({
