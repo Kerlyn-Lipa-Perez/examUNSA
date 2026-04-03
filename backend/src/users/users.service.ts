@@ -29,12 +29,43 @@ export class UsersService {
     });
   }
 
-  async create(data: { email: string; passwordHash: string; nombre: string }) {
+  async create(data: { email: string; passwordHash?: string; nombre: string; googleId?: string; avatarUrl?: string }) {
     const [nuevoUsuario] = await this.db
       .insert(schema.users)
       .values(data)
       .returning();
     return nuevoUsuario;
+  }
+
+  async findByGoogleId(googleId: string) {
+    return this.db.query.users.findFirst({
+      where: (users, { eq }) => eq(users.googleId, googleId),
+    });
+  }
+
+  async updateAvatarUrl(userId: string, avatarUrl: string | null) {
+    const [updated] = await this.db
+      .update(schema.users)
+      .set({ avatarUrl })
+      .where(eq(schema.users.id, userId))
+      .returning();
+    return updated;
+  }
+
+  async linkGoogleAccount(userId: string, googleId: string, avatarUrl?: string) {
+    const updateData: { googleId: string; avatarUrl?: string } = { googleId };
+    // Solo actualizar avatar si el usuario no tiene uno propio
+    const user = await this.findById(userId);
+    if (user && !user.avatarUrl && avatarUrl) {
+      updateData.avatarUrl = avatarUrl;
+    }
+
+    const [updated] = await this.db
+      .update(schema.users)
+      .set(updateData)
+      .where(eq(schema.users.id, userId))
+      .returning();
+    return updated;
   }
 
   async updatePlan(userId: string, plan: 'free' | 'pro') {

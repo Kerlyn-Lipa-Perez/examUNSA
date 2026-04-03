@@ -32,8 +32,7 @@ describe('useAuthStore', () => {
     it('debe guardar usuario, token y plan', () => {
       const mockUser = {
         id: 'user-123',
-        nombre: 'Juan',
-        apellido: 'Pérez',
+        nombre: 'Juan Pérez',
         email: 'juan@example.com',
         plan: 'pro' as const,
       };
@@ -50,8 +49,7 @@ describe('useAuthStore', () => {
     it('debe guardar cookie para middleware Next.js', () => {
       const mockUser = {
         id: 'user-123',
-        nombre: 'Juan',
-        apellido: 'Pérez',
+        nombre: 'Juan Pérez',
         email: 'juan@example.com',
         plan: 'free' as const,
       };
@@ -66,8 +64,7 @@ describe('useAuthStore', () => {
     it('debe actualizar plan según el usuario', () => {
       const proUser = {
         id: 'user-123',
-        nombre: 'Ana',
-        apellido: 'López',
+        nombre: 'Ana López',
         email: 'ana@example.com',
         plan: 'pro' as const,
       };
@@ -83,8 +80,7 @@ describe('useAuthStore', () => {
       // Primero hacer login
       const mockUser = {
         id: 'user-123',
-        nombre: 'Juan',
-        apellido: 'Pérez',
+        nombre: 'Juan Pérez',
         email: 'juan@example.com',
         plan: 'pro' as const,
       };
@@ -109,23 +105,23 @@ describe('useAuthStore', () => {
 });
 
 describe('getInitials', () => {
-  it('debe retornar iniciales de nombre y apellido', () => {
-    expect(getInitials('Juan', 'Pérez')).toBe('JP');
+  it('debe retornar iniciales del nombre y apellido del nombre completo', () => {
+    expect(getInitials('Juan Pérez')).toBe('JP');
   });
 
   it('debe manejar nombre sin apellido', () => {
-    expect(getInitials('Juan', '')).toBe('J');
+    expect(getInitials('Juan')).toBe('J');
   });
 
   it('debe manejar strings vacíos', () => {
-    expect(getInitials('', '')).toBe('?');
+    expect(getInitials('')).toBe('?');
   });
 
   it('debe convertir a mayúsculas', () => {
-    expect(getInitials('maría', 'garcía')).toBe('MG');
+    expect(getInitials('maría garcía')).toBe('MG');
   });
 
   it('debe manejar caracteres especiales', () => {
-    expect(getInitials('José', 'Ñuñez')).toBe('JÑ');
+    expect(getInitials('José Ñuñez')).toBe('JÑ');
   });
 });

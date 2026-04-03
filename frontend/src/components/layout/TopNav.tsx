@@ -19,7 +19,7 @@ export function TopNav() {
   };
 
   // Obtener iniciales del usuario
-  const initials = user ? getInitials(user.nombre, user.apellido) : '?';
+  const initials = user ? getInitials(user.nombre) : '?';
   const streak = user?.streakDias || 0;
 
   return (
@@ -58,9 +58,13 @@ export function TopNav() {
           </Link>
         )}
         
-        {/* Avatar con iniciales - link al perfil */}
+        {/* Avatar - link al perfil */}
         <Link href="/perfil" className="w-8 h-8 rounded-full bg-primary overflow-hidden border border-primary flex items-center justify-center hover:scale-105 transition-transform">
-          <span className="text-neutral-900 font-bold text-sm">{initials}</span>
+          {user?.avatarUrl ? (
+            <img src={user.avatarUrl} alt={user.nombre} className="w-full h-full object-cover" />
+          ) : (
+            <span className="text-neutral-900 font-bold text-sm">{initials}</span>
+          )}
         </Link>
         <LogoutButton />
       </div>

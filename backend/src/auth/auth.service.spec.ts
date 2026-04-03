@@ -3,6 +3,7 @@ import { AuthService } from './auth.service';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { EmailService } from '../email/email.service';
+import { ConfigService } from '@nestjs/config';
 import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 
@@ -28,6 +29,8 @@ describe('AuthService', () => {
     simulacrosHoy: 0,
     streakDias: 0,
     ultimoAcceso: null,
+    googleId: null,
+    avatarUrl: null,
     passwordResetToken: null,
     passwordResetExpires: null,
     preferencias: null,
@@ -43,7 +46,9 @@ describe('AuthService', () => {
           useValue: {
             findByEmail: jest.fn(),
             findById: jest.fn(),
+            findByGoogleId: jest.fn(),
             create: jest.fn(),
+            linkGoogleAccount: jest.fn(),
             setPasswordResetToken: jest.fn(),
             findByResetToken: jest.fn(),
             resetPassword: jest.fn(),
@@ -59,6 +64,12 @@ describe('AuthService', () => {
           provide: EmailService,
           useValue: {
             sendPasswordResetEmail: jest.fn().mockResolvedValue(undefined),
+          },
+        },
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn().mockReturnValue('mock-google-client-id'),
           },
         },
       ],

@@ -33,6 +33,10 @@ services:
       CULQI_PUBLIC_KEY: ${CULQI_PUBLIC_KEY}
       CULQI_SECRET_KEY: ${CULQI_SECRET_KEY}
       RESEND_API_KEY: ${RESEND_API_KEY}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
       FRONTEND_URL: http://localhost:3000
       NODE_ENV: development
     depends_on:
@@ -52,6 +56,7 @@ services:
       - "3000:3000"
     environment:
       - NEXT_PUBLIC_API_URL=http://localhost:3001/api
+      - NEXT_PUBLIC_GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - API_URL_INTERNAL=http://backend:3001/api
       - NODE_ENV=development
       - WATCHPACK_POLLING=true

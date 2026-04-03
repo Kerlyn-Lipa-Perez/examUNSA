@@ -14,6 +14,7 @@ import { EmailModule } from './email/email.module';
 import { SchedulerModule } from './scheduler/scheduler.module';
 import { RankingModule } from './ranking/ranking.module';
 import { EstadisticasModule } from './estadisticas/estadisticas.module';
+import { UploadModule } from './upload/upload.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { EstadisticasModule } from './estadisticas/estadisticas.module';
     SchedulerModule,
     RankingModule,
     EstadisticasModule,
+    UploadModule,
   ],
 })
 export class AppModule {}

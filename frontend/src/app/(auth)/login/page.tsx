@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
 import { useAuthStore } from '@/store/authStore';
+import { GoogleLoginButton } from '@/components/auth/GoogleLoginButton';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -48,8 +49,9 @@ export default function LoginPage() {
         console.error("Respuesta de login fallida:", data);
         throw new Error('No se recibió el token de autenticación. Revisa la consola para más detalles.');
       }
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Error al iniciar sesión';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -139,7 +141,21 @@ export default function LoginPage() {
                 )}
               </button>
             </form>
-            <div className="mt-10 pt-8 border-t border-neutral-border text-center">
+
+            {/* Separador */}
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-neutral-border"></div>
+              </div>
+              <div className="relative flex justify-center text-xs">
+                <span className="bg-neutral-800 px-3 text-gray-500 font-mono uppercase tracking-wider">o continúa con</span>
+              </div>
+            </div>
+
+            {/* Google Login */}
+            <GoogleLoginButton />
+
+            <div className="mt-6 pt-6 border-t border-neutral-border text-center">
               <p className="text-gray-400 text-sm">
                 ¿No tienes cuenta? 
                 <Link href="/registro" className="text-primary font-bold hover:underline ml-1">Regístrate</Link>

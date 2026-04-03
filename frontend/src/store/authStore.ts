@@ -5,9 +5,9 @@ import Cookies from 'js-cookie';
 export interface UserData {
   id: string;
   nombre: string;
-  apellido: string;
   email: string;
   plan: 'free' | 'pro';
+  avatarUrl?: string | null;
   simulacrosHoy?: number;
   streakDias?: number;
   ultimoAcceso?: string;
@@ -41,9 +41,11 @@ export const useAuthStore = create<AuthState>()(
   ),
 );
 
-// Helper para obtener iniciales
-export function getInitials(nombre: string, apellido: string): string {
-  const inicialNombre = nombre?.charAt(0).toUpperCase() || '';
-  const inicialApellido = apellido?.charAt(0).toUpperCase() || '';
-  return `${inicialNombre}${inicialApellido}` || inicialNombre || '?';
+// Helper para obtener iniciales desde el nombre completo
+export function getInitials(nombre: string): string {
+  if (!nombre) return '?';
+  const parts = nombre.trim().split(/\s+/);
+  const first = parts[0]?.charAt(0).toUpperCase() || '';
+  const last = parts.length > 1 ? parts[parts.length - 1]?.charAt(0).toUpperCase() || '' : '';
+  return `${first}${last}` || '?';
 }

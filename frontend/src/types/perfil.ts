@@ -2,9 +2,9 @@
 export interface UserProfile {
   id: string;
   nombre: string;
-  apellido: string;
   email: string;
   plan: 'free' | 'pro';
+  avatarUrl?: string | null;
   simulacrosHoy: number;
   streakDias: number;
   ultimoAcceso?: string;

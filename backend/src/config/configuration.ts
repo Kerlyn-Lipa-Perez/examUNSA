@@ -29,4 +29,14 @@ export default () => ({
     apiKey: process.env.RESEND_API_KEY,
     fromEmail: process.env.RESEND_FROM_EMAIL || 'Combo UNSA <onboarding@resend.dev>',
   },
+
+  google: {
+    clientId: process.env.GOOGLE_CLIENT_ID,
+  },
+
+  cloudinary: {
+    cloudName: process.env.CLOUDINARY_CLOUD_NAME,
+    apiKey: process.env.CLOUDINARY_API_KEY,
+    apiSecret: process.env.CLOUDINARY_API_SECRET,
+  },
 });

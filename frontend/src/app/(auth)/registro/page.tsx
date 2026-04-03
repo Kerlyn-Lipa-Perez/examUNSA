@@ -3,10 +3,12 @@ import Link from 'next/link';
 import { Footer } from '@/components/layout/Footer';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Cookies from 'js-cookie';
+import { useAuthStore } from '@/store/authStore';
+import { GoogleLoginButton } from '@/components/auth/GoogleLoginButton';
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { setAuth } = useAuthStore();
   const [nombre, setNombre] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -32,14 +34,27 @@ export default function RegisterPage() {
         throw new Error(data.message || 'Error en el registro');
       }
 
-      if (data.access_token) {
-        Cookies.set('access_token', data.access_token, { expires: 30 });
+      const resolvedToken = data.token || data.access_token;
+      const resolvedUser = data.user;
+
+      if (resolvedToken && resolvedUser) {
+        setAuth(resolvedUser, resolvedToken);
+        router.push('/dashboard');
+      } else if (resolvedToken) {
+  
+        setAuth({
+          id: '',
+          nombre,
+          email,
+          plan: 'free',
+        }, resolvedToken);
         router.push('/dashboard');
       } else {
         router.push('/login');
       }
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Error en el registro';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -150,9 +165,22 @@ export default function RegisterPage() {
                 </button>
               </div>
             </form>
+
+            {/* Separador */}
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-neutral-border"></div>
+              </div>
+              <div className="relative flex justify-center text-xs">
+                <span className="bg-neutral-800 px-3 text-gray-500 font-mono uppercase tracking-wider">o regístrate con</span>
+              </div>
+            </div>
+
+            {/* Google Login */}
+            <GoogleLoginButton />
             
             {/* Footer Link */}
-            <div className="mt-8 text-center">
+            <div className="mt-6 pt-6 border-t border-neutral-border text-center">
               <Link href="/login" className="text-sm text-gray-400 hover:text-primary transition-colors duration-200">
                   ¿Ya eres estudiante? <span className="font-bold underline">Inicia sesión</span>
               </Link>

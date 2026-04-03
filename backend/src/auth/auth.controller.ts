@@ -5,6 +5,7 @@ import { LoginDto } from './dto/login.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { GoogleAuthDto } from './dto/google-auth.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
 
 @Controller('auth')
@@ -19,6 +20,11 @@ export class AuthController {
   @Post('login')
   async login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
+  }
+
+  @Post('google')
+  async googleLogin(@Body() dto: GoogleAuthDto) {
+    return this.authService.googleLogin(dto.credential);
   }
 
   @Post('forgot-password')

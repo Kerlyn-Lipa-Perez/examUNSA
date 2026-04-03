@@ -10,18 +10,24 @@ import { relations, sql } from 'drizzle-orm';
 export const users = pgTable('users', {
   id:                   uuid('id').primaryKey().defaultRandom(),
   email:                varchar('email', { length: 255 }).unique().notNull(),
-  passwordHash:         varchar('password_hash', { length: 255 }).notNull(),
+  passwordHash:         varchar('password_hash', { length: 255 }), // null para usuarios de Google
   nombre:               varchar('nombre', { length: 100 }).notNull(),
   plan:                 varchar('plan', { length: 10 }).default('free').notNull(), // 'free' | 'pro'
   simulacrosHoy:        integer('simulacros_hoy').default(0).notNull(),
   streakDias:           integer('streak_dias').default(0).notNull(),
   ultimoAcceso:         date('ultimo_acceso'),
   createdAt:            timestamp('created_at').defaultNow().notNull(),
-  
+
+  // Auth social
+  googleId:             varchar('google_id', { length: 255 }).unique(),
+
+  // Foto de perfil
+  avatarUrl:            varchar('avatar_url', { length: 500 }),
+
   // Password reset
   passwordResetToken:   varchar('password_reset_token', { length: 255 }),
   passwordResetExpires: timestamp('password_reset_expires'),
-  
+
   // Preferencias del usuario (JSONB)
   preferencias:         jsonb('preferencias').$type<UserPreferences>(),
 });
