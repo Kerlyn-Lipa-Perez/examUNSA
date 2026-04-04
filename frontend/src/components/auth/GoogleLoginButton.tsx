@@ -3,12 +3,34 @@
 import { useRouter } from 'next/navigation';
 import { GoogleLogin, CredentialResponse } from '@react-oauth/google';
 import { useAuthStore } from '@/store/authStore';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export function GoogleLoginButton() {
   const router = useRouter();
   const { setAuth } = useAuthStore();
   const [error, setError] = useState('');
+  const [clientId, setClientId] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    setClientId(process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || null);
+  }, []);
+
+  // Durante SSR o mientras monta, no renderizar nada
+  if (!mounted) {
+    return <div className="w-full h-[50px]" />;
+  }
+
+  if (!clientId) {
+    return (
+      <div className="w-full p-4 text-center">
+        <div className="bg-neutral-700/50 rounded-lg p-4 text-gray-400 text-sm">
+        Google OAuth no está configurado. Contacta al administrador.
+        </div>
+      </div>
+    );
+  }
 
   const handleSuccess = async (credentialResponse: CredentialResponse) => {
     if (!credentialResponse.credential) {

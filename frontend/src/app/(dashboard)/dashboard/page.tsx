@@ -59,7 +59,7 @@ export default function DashboardPage() {
         <StatCard
           title="RACHA"
           value={isLoading ? '...' : String(stats?.diasRacha ?? 0)}
-          highlight="🔥"
+          highlight=""
           textHighlight="text-primary"
           loading={isLoading}
         />
@@ -130,7 +130,6 @@ export default function DashboardPage() {
               href="/simulacros"
               className="w-full bg-primary hover:bg-yellow-500 active:scale-95 text-neutral-900 font-bold py-3 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 text-sm"
             >
-              <span>🚀</span>
               Iniciar Simulacro
             </Link>
 

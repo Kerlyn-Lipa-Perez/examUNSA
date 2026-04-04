@@ -211,6 +211,10 @@ export class UsersService {
         .where(eq(schema.flashcardProgress.userId, userId)),
     ]);
 
+    // Extraer los totales de los arrays
+    const [flashcardsResult] = statsFlashcards;
+    const [progressResult] = statsSimulacros;
+
     if (!user) return null;
 
     // Calcular stats de simulacros (total y mejor puntuación)
@@ -247,9 +251,9 @@ export class UsersService {
       diasRacha: user.streakDias,
       
       // Flashcard stats
-      flashcardsTotales: Number(statsFlashcards.total || 0),
-      flashcardsCreadas: Number(statsFlashcards.total || 0),
-      flashcardsEnProgreso: Number(statsSimulacros.total || 0),
+      flashcardsTotales: Number(flashcardsResult?.total || 0),
+      flashcardsCreadas: Number(flashcardsResult?.total || 0),
+      flashcardsEnProgreso: Number(progressResult?.total || 0),
       
       // Progress by materia
       progresoPorMateria,
