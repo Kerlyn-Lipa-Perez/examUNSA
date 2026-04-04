@@ -43,6 +43,13 @@ export class SimulacrosService {
   }
 
   async guardarResultado(userId: string, dto: GuardarResultadoDto) {
+    // Obtener el valor real de simulacrosHoy desde la DB
+    const user = await this.db.query.users.findFirst({
+      where: eq(schema.users.id, userId),
+    });
+    
+    const simulacrosHoyReal = user?.simulacrosHoy ?? 0;
+
     const [resultado] = await this.db
       .insert(schema.simulacroResults)
       .values({
@@ -56,11 +63,11 @@ export class SimulacrosService {
       })
       .returning();
 
-    // Calcular y registrar puntos de ranking
+    // Calcular y registrar puntos de ranking usando el valor REAL de la DB
     const puntosRanking = await this.rankingService.registrarPuntosSimulacro(userId, {
       puntaje: dto.puntaje,
       totalPreguntas: dto.respuestas.length,
-      simulacrosHoy: dto.simulacrosHoy ?? 0,
+      simulacrosHoy: simulacrosHoyReal,
     });
 
     return {

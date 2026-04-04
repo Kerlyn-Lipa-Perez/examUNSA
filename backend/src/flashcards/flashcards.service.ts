@@ -54,41 +54,45 @@ export class FlashcardsService {
     }
 
     // 2. Nuevas: flashcards que el usuario NO tiene en progreso (SQL, no JS)
-    const remaining = limit - pendientes.length;
+    // Solo obtener nuevas si hay espacio disponible (remaining > 0)
+    const remaining = Math.max(0, limit - pendientes.length);
+    let nuevas: typeof pendientes = [];
 
-    const pendientesIds = pendientes.map(p => p.id);
+    if (remaining > 0) {
+      const pendientesIds = pendientes.map(p => p.id);
 
-    const nuevas = await this.db
-      .select({
-        id: schema.flashcards.id,
-        pregunta: schema.flashcards.pregunta,
-        respuesta: schema.flashcards.respuesta,
-        materia: schema.flashcards.materia,
-      })
-      .from(schema.flashcards)
-      .where(
-        and(
-          // Del sistema (null) o propias del usuario
-          or(isNull(schema.flashcards.userId), eq(schema.flashcards.userId, userId)),
-          // Excluir las que ya están pendientes en esta carga
-          pendientesIds.length > 0
-            ? sql`${schema.flashcards.id} NOT IN (${sql.join(pendientesIds, sql.raw(', '))})`
-            : sql`TRUE`,
-          // Excluir las que ya tienen progreso (subquery SQL)
-          notExists(
-            this.db
-              .select({ id: schema.flashcardProgress.id })
-              .from(schema.flashcardProgress)
-              .where(
-                and(
-                  eq(schema.flashcardProgress.userId, userId),
-                  eq(schema.flashcardProgress.flashcardId, schema.flashcards.id),
+      nuevas = await this.db
+        .select({
+          id: schema.flashcards.id,
+          pregunta: schema.flashcards.pregunta,
+          respuesta: schema.flashcards.respuesta,
+          materia: schema.flashcards.materia,
+        })
+        .from(schema.flashcards)
+        .where(
+          and(
+            // Del sistema (null) o propias del usuario
+            or(isNull(schema.flashcards.userId), eq(schema.flashcards.userId, userId)),
+            // Excluir las que ya están pendientes en esta carga
+            pendientesIds.length > 0
+              ? sql`${schema.flashcards.id} NOT IN (${sql.join(pendientesIds, sql.raw(', '))})`
+              : sql`TRUE`,
+            // Excluir las que ya tienen progreso (subquery SQL)
+            notExists(
+              this.db
+                .select({ id: schema.flashcardProgress.id })
+                .from(schema.flashcardProgress)
+                .where(
+                  and(
+                    eq(schema.flashcardProgress.userId, userId),
+                    eq(schema.flashcardProgress.flashcardId, schema.flashcards.id),
+                  ),
                 ),
-              ),
+            ),
           ),
-        ),
-      )
-      .limit(remaining);
+        )
+        .limit(remaining);
+    }
 
     return {
       cards: [...pendientes, ...nuevas],

@@ -1,7 +1,7 @@
 import { Injectable, Inject, BadRequestException, Logger } from '@nestjs/common';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { eq, desc } from 'drizzle-orm';
-import { createHmac } from 'crypto';
+import { createHmac, timingSafeEqual } from 'crypto';
 import { DATABASE_CONNECTION } from '../database/database.provider';
 import * as schema from '../database/schema';
 
@@ -144,7 +144,12 @@ export class PagosService {
       .update(bodyString)
       .digest('hex');
 
-    if (signature !== expectedSignature) {
+    // Comparación timing-safe para evitar timing attacks
+    const signatureBuffer = Buffer.from(signature, 'hex');
+    const expectedBuffer = Buffer.from(expectedSignature, 'hex');
+    
+    if (signatureBuffer.length !== expectedBuffer.length || 
+        !timingSafeEqual(signatureBuffer, expectedBuffer)) {
       this.logger.warn('Firma HMAC de webhook de Culqi inválida');
       return { received: false };
     }

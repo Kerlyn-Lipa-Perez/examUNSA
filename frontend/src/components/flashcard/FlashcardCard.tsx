@@ -1,6 +1,6 @@
 'use client';
 
-import { Flashcard, MATERIA_LABELS, MATERIA_COLORS, Materia } from '@/types/flashcard';
+import { Flashcard } from '@/types/flashcard';
 import { getMateriaColor, getMateriaLabel } from '@/hooks/useFlashcards';
 import { RotateCcw, BookOpen } from 'lucide-react';
 
@@ -15,22 +15,18 @@ export function FlashcardCard({ flashcard, isFlipped, onFlip }: FlashcardCardPro
   const materiaLabel = getMateriaLabel(flashcard.materia);
 
   return (
-    <div className="w-full max-w-2xl mx-auto perspective-1000">
+    <div className="w-full max-w-2xl mx-auto" style={{ perspective: '1000px' }}>
       <div
-        className={`relative w-full min-h-[400px] cursor-pointer transition-transform duration-500 preserve-3d ${
-          isFlipped ? 'rotate-y-180' : ''
-        }`}
+        className={`relative w-full min-h-[400px] cursor-pointer transition-transform duration-500`}
         onClick={onFlip}
         style={{
           transformStyle: 'preserve-3d',
           transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
-        }}
-      >
+        }}>
         {/* Frente de la tarjeta - Pregunta */}
         <div
-          className={`absolute inset-0 backface-hidden rounded-2xl border-l-4 ${materiaColor} bg-neutral-800 border border-neutral-border p-8 flex flex-col`}
-          style={{ backfaceVisibility: 'hidden' }}
-        >
+          className={`absolute inset-0 rounded-2xl border-l-4 ${materiaColor} bg-neutral-800 border border-neutral-border p-8 flex flex-col`}
+          style={{ backfaceVisibility: 'hidden' }}>
           {/* Header con materia */}
           <div className="flex items-center justify-between mb-6">
             <span className="text-xs font-mono uppercase tracking-wider text-gray-500">
@@ -57,12 +53,11 @@ export function FlashcardCard({ flashcard, isFlipped, onFlip }: FlashcardCardPro
 
         {/* Reverso de la tarjeta - Respuesta */}
         <div
-          className={`absolute inset-0 backface-hidden rounded-2xl bg-neutral-700 border border-neutral-border p-8 flex flex-col rotate-y-180`}
+          className={`absolute inset-0 rounded-2xl bg-neutral-700 border border-neutral-border p-8 flex flex-col`}
           style={{
             backfaceVisibility: 'hidden',
             transform: 'rotateY(180deg)',
-          }}
-        >
+          }}>
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <span className="text-xs font-mono uppercase tracking-wider text-gray-500">

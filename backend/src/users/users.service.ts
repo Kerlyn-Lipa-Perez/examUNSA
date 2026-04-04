@@ -1,6 +1,6 @@
 import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, sql, count } from 'drizzle-orm';
 import { DATABASE_CONNECTION } from '../database/database.provider';
 import * as schema from '../database/schema';
 import { UserPreferences } from '../database/schema';
@@ -183,41 +183,52 @@ export class UsersService {
   }
 
   async getUserStats(userId: string) {
-    // Get basic user info
-    const user = await this.findById(userId);
+    // Ejecutar todas las queries en paralelo para mejor rendimiento
+    const [user, simulacrosRecientes, statsFlashcards, statsSimulacros] = await Promise.all([
+      this.findById(userId),
+      // Últimos 5 simulacros
+      this.db
+        .select({
+          id: schema.simulacroResults.id,
+          materia: schema.simulacroResults.materia,
+          puntaje: schema.simulacroResults.puntaje,
+          totalPreguntas: schema.simulacroResults.totalPreguntas,
+          createdAt: schema.simulacroResults.createdAt,
+        })
+        .from(schema.simulacroResults)
+        .where(eq(schema.simulacroResults.userId, userId))
+        .orderBy(sql`${schema.simulacroResults.createdAt} DESC`)
+        .limit(5),
+      // Contar flashcards del usuario (solo las creadas por él)
+      this.db
+        .select({ total: count() })
+        .from(schema.flashcards)
+        .where(eq(schema.flashcards.userId, userId)),
+      // Contar progress (cards en progreso)
+      this.db
+        .select({ total: count() })
+        .from(schema.flashcardProgress)
+        .where(eq(schema.flashcardProgress.userId, userId)),
+    ]);
+
     if (!user) return null;
 
-    // Get simulacro results
-    const simulacros = await this.db.query.simulacroResults.findMany({
-      where: eq(schema.simulacroResults.userId, userId),
-      orderBy: (simulacroResults, { desc }) => [desc(simulacroResults.createdAt)],
-      limit: 10,
-    });
+    // Calcular stats de simulacros (total y mejor puntuación)
+    const [totalSimulacrosResult] = await this.db
+      .select({ total: sql<number>`COALESCE(MAX(${schema.simulacroResults.puntaje}), 0)::int`, count: sql<number>`COUNT(*)::int` })
+      .from(schema.simulacroResults)
+      .where(eq(schema.simulacroResults.userId, userId));
 
-    // Get flashcard stats
-    const flashcardsCount = await this.db.query.flashcards.findMany({
-      where: eq(schema.flashcards.userId, userId),
-    });
-
-    const progressCount = await this.db.query.flashcardProgress.findMany({
-      where: eq(schema.flashcardProgress.userId, userId),
-    });
-
-    // Calculate stats
-    const totalSimulacros = simulacros.length;
-    const simulacrosHoy = user.simulacrosHoy;
-    const mejorPuntaje = simulacros.length > 0 
-      ? Math.max(...simulacros.map(s => s.puntaje)) 
-      : 0;
-    const promedioPuntaje = simulacros.length > 0
-      ? Math.round(simulacros.reduce((acc, s) => acc + s.puntaje, 0) / simulacros.length)
+    const mejorPuntaje = Number(totalSimulacrosResult?.total || 0);
+    const totalSimulacros = Number(totalSimulacrosResult?.count || 0);
+    const promedioPuntaje = totalSimulacros > 0 
+      ? Math.round(simulacrosRecientes.reduce((acc, s) => acc + s.puntaje, 0) / simulacrosRecientes.length)
       : 0;
 
-    // Progress by materia
+    // Progress by materia (desde los simulacros recientes)
     const progresoPorMateria: Record<string, { promedio: number; simulacros: number }> = {};
-
     for (const materia of MATERIAS_VALIDAS) {
-      const materiaResults = simulacros.filter(s => s.materia.toLowerCase() === materia);
+      const materiaResults = simulacrosRecientes.filter(s => s.materia.toLowerCase() === materia);
       if (materiaResults.length > 0) {
         const promedio = Math.round(materiaResults.reduce((acc, s) => acc + s.puntaje, 0) / materiaResults.length);
         progresoPorMateria[materia] = {
@@ -230,21 +241,21 @@ export class UsersService {
     return {
       // User stats
       simulacrosTotales: totalSimulacros,
-      simulacrosHoy,
+      simulacrosHoy: user.simulacrosHoy,
       mejorPuntaje,
       promedioPuntaje,
       diasRacha: user.streakDias,
       
       // Flashcard stats
-      flashcardsTotales: flashcardsCount.length,
-      flashcardsCreadas: flashcardsCount.length,
-      flashcardsEnProgreso: progressCount.length,
+      flashcardsTotales: Number(statsFlashcards.total || 0),
+      flashcardsCreadas: Number(statsFlashcards.total || 0),
+      flashcardsEnProgreso: Number(statsSimulacros.total || 0),
       
       // Progress by materia
       progresoPorMateria,
       
       // Recent simulacros
-      ultimosSimulacros: simulacros.slice(0, 5).map(s => ({
+      ultimosSimulacros: simulacrosRecientes.map(s => ({
         id: s.id,
         materia: s.materia,
         puntaje: s.puntaje,

@@ -1,7 +1,7 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useExamStore } from '@/store/examStore';
 import { loadExam } from '@/data/exams/loader';
 import { ExamHeader } from '@/components/simulacro/ExamHeader';
@@ -33,35 +33,38 @@ export default function ExamPage() {
 
   const [loading, setLoading] = useState(true);
   const [showConfirm, setShowConfirm] = useState(false);
+  const loadedRef = useRef(false);
 
   useEffect(() => {
+    // Evitar carga múltiples o si ya tenemos datos
+    if (loadedRef.current || examData) {
+      setLoading(false);
+      return;
+    }
+
     async function load() {
       setLoading(true);
       const data = await loadExam('UNSA', area, examId);
       if (data) {
-        if (data.preguntas.length === 0) {
-  
-          setLoading(false);
-          return;
+        if (data.preguntas.length > 0) {
+          startExam(data);
         }
-        startExam(data);
       }
       setLoading(false);
+      loadedRef.current = true;
     }
 
+    load();
 
-    if (status === 'idle') {
-      load();
-    } else {
-      setLoading(false);
-    }
-
-   
     return () => {
-
+      // Cleanup opcional
     };
-  }, [area, examId]); 
+  }, [area, examId, startExam, examData]);
 
+  // Resetear loadedRef cuando cambia el examId (para permitir reintentar)
+  useEffect(() => {
+    loadedRef.current = false;
+  }, [examId]);
 
   useEffect(() => {
     if (status === 'finished') {
@@ -129,7 +132,7 @@ export default function ExamPage() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-900 flex flex-col -m-8">
+    <div className="min-h-screen bg-neutral-900 flex flex-col">
       {/* Header */}
       <ExamHeader />
 

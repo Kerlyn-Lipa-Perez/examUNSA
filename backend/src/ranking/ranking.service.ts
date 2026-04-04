@@ -157,7 +157,16 @@ export class RankingService {
     if (!ranking) {
       [ranking] = await this.db
         .insert(schema.userRanking)
-        .values({ userId })
+        .values({
+          userId,
+          totalRp: 0,
+          simulacrosCompletados: 0,
+          rachaActual: 0,
+          rachaMaxima: 0,
+          respuestasCorrectas: 0,
+          respuestasTotales: 0,
+          flashcardsRevisadas: 0,
+        })
         .returning();
     }
 
