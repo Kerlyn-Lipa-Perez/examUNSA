@@ -43,7 +43,7 @@ export function TopNav() {
       <div className="flex items-center gap-4">
         {/* Streak */}
         <div className="flex items-center gap-2 bg-neutral-800 px-3 py-1.5 rounded-full border border-neutral-border">
-          <span className="text-primary">🔥</span>
+          <span className="text-primary">Racha : </span>
           <span className="text-white font-medium text-sm font-mono">{streak}</span>
         </div>
         
