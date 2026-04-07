@@ -13,7 +13,7 @@ export class EmailService {
   }
 
   async sendPasswordResetEmail(email: string, nombre: string, resetToken: string) {
-    const resetUrl = `${this.config.get('FRONTEND_URL')}/reset-password?token=${resetToken}`;
+    const resetUrl = `${this.config.get('FRONTEND_URL')}/restablecer-contrasena?token=${resetToken}`;
 
     const htmlContent = `
     <!DOCTYPE html>

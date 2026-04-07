@@ -111,7 +111,7 @@ export default function LoginPage() {
               <div className="relative group">
                 <div className="flex justify-between items-end mb-1">
                   <label className="font-mono text-[11px] uppercase tracking-widest text-gray-400 group-focus-within:text-primary transition-colors">Contraseña</label>
-                  <Link href="#" className="text-[11px] text-gray-400 hover:text-primary transition-colors font-medium">¿Olvidaste tu contraseña?</Link>
+                  <Link href="/olvidaste-tu-contrasena" className="text-[11px] text-gray-400 hover:text-primary transition-colors font-medium">¿Olvidaste tu contraseña?</Link>
                 </div>
                 <div className="flex items-center border-b-2 border-neutral-border group-focus-within:border-primary transition-all bg-transparent group-focus-within:bg-neutral-700/30 px-1 py-2">
                   <svg className="text-gray-500 group-focus-within:text-primary w-5 h-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
