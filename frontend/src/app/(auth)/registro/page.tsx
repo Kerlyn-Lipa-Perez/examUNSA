@@ -101,9 +101,9 @@ export default function RegisterPage() {
             {error && <div className="mb-4 text-red-500 text-sm bg-red-900/20 p-3 rounded">{error}</div>}
 
             <form className="space-y-6" onSubmit={handleSubmit}>
-              {/* Nombre Completo */}
+              {/* Nombre de Usuario */}
               <div className="space-y-1">
-                <label className="font-mono text-[11px] uppercase tracking-widest text-gray-500" htmlFor="name">Nombre Completo</label>
+                <label className="font-mono text-[11px] uppercase tracking-widest text-gray-500" htmlFor="name">Nombre de Usuario</label>
                 <div className="relative">
                   <input 
                     className="w-full bg-transparent border-b-2 border-neutral-border focus:border-primary focus:ring-0 px-0 py-3 text-white placeholder-gray-600 outline-none transition-all duration-300" 

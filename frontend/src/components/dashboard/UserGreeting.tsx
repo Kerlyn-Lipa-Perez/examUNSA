@@ -15,7 +15,7 @@ export function UserGreeting() {
 
   return (
     <h1 className="text-3xl font-bold text-white flex items-center gap-2">
-      Hola, {name} <span role="img" aria-label="wave">👋</span>
+      Hola, {name} <span role="img" aria-label="wave"></span>
     </h1>
   );
 }

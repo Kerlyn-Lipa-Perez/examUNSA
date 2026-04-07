@@ -44,13 +44,7 @@ export default function PerfilPage() {
             <Settings className="w-4 h-4" />
             <span className="text-sm">Configuración</span>
           </Link>
-          <button
-            onClick={logout}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-neutral-border text-gray-400 hover:text-error hover:bg-error/10 transition-colors"
-          >
-            <LogOut className="w-4 h-4" />
-            <span className="text-sm">Cerrar Sesión</span>
-          </button>
+          
         </div>
       </div>
 
