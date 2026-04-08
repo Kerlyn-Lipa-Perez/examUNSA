@@ -20,8 +20,4 @@ export class GuardarResultadoDto {
   @IsNotEmpty()
   @IsArray()
   respuestas: any[];
-
-  @IsOptional()
-  @IsNumber()
-  simulacrosHoy?: number;
 }

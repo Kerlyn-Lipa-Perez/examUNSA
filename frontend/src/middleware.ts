@@ -8,7 +8,9 @@ export function middleware(request: NextRequest) {
     request.nextUrl.pathname.startsWith('/simulacros') ||
     request.nextUrl.pathname.startsWith('/flashcards') ||
     request.nextUrl.pathname.startsWith('/ranking') ||
-    request.nextUrl.pathname.startsWith('/estadisticas');
+    request.nextUrl.pathname.startsWith('/estadisticas') ||
+    request.nextUrl.pathname.startsWith('/perfil') ||
+    request.nextUrl.pathname.startsWith('/configuracion');
 
   if (isProtected && !token) {
     return NextResponse.redirect(new URL('/login', request.url));
@@ -17,5 +19,13 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/simulacros/:path*', '/flashcards/:path*', '/ranking/:path*', '/estadisticas/:path*'],
+  matcher: [
+    '/dashboard/:path*',
+    '/simulacros/:path*',
+    '/flashcards/:path*',
+    '/ranking/:path*',
+    '/estadisticas/:path*',
+    '/perfil/:path*',
+    '/configuracion/:path*',
+  ],
 };

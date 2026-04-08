@@ -1,7 +1,7 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useExamStore } from '@/store/examStore';
 import { loadExam } from '@/data/exams/loader';
 import { ExamHeader } from '@/components/simulacro/ExamHeader';
@@ -16,27 +16,38 @@ export default function ExamPage() {
   const area = params.area as ExamArea;
   const examId = params.examId as string;
 
-  const {
-    examData,
-    currentQuestionIndex,
-    userAnswers,
-    status,
-    startExam,
-    selectAnswer,
-    nextQuestion,
-    prevQuestion,
-    finishExam,
-    resetExam,
-    getCurrentQuestion,
-    getCurrentAnswer,
-  } = useExamStore();
+  const examData = useExamStore((state) => state.examData);
+  const currentQuestionIndex = useExamStore((state) => state.currentQuestionIndex);
+  const userAnswers = useExamStore((state) => state.userAnswers);
+  const status = useExamStore((state) => state.status);
 
   const [loading, setLoading] = useState(true);
   const [showConfirm, setShowConfirm] = useState(false);
   const loadedRef = useRef(false);
+  const prevExamIdRef = useRef(examId);
+
+  // Funciones stable del store
+  const selectAnswer = useExamStore((state) => state.selectAnswer);
+  const nextQuestion = useExamStore((state) => state.nextQuestion);
+  const prevQuestion = useExamStore((state) => state.prevQuestion);
+  const finishExam = useExamStore((state) => state.finishExam);
+  const resetExam = useExamStore((state) => state.resetExam);
+  const getCurrentQuestion = useExamStore((state) => state.getCurrentQuestion);
+  const getCurrentAnswer = useExamStore((state) => state.getCurrentAnswer);
+
+  // Función para iniciar examen (acceder directamente al store para evitar dependencia inestable)
+  const startExam = useCallback((data: any) => {
+    useExamStore.getState().startExam(data);
+  }, []);
 
   useEffect(() => {
-    // Evitar carga múltiples o si ya tenemos datos
+    // Resetear loadedRef cuando cambia el examId (para permitir reintentar)
+    if (examId !== prevExamIdRef.current) {
+      loadedRef.current = false;
+      prevExamIdRef.current = examId;
+    }
+
+    // Evitar carga múltiple o si ya tenemos datos
     if (loadedRef.current || examData) {
       setLoading(false);
       return;
@@ -45,26 +56,15 @@ export default function ExamPage() {
     async function load() {
       setLoading(true);
       const data = await loadExam('UNSA', area, examId);
-      if (data) {
-        if (data.preguntas.length > 0) {
-          startExam(data);
-        }
+      if (data && data.preguntas.length > 0) {
+        useExamStore.getState().startExam(data);
       }
       setLoading(false);
       loadedRef.current = true;
     }
 
     load();
-
-    return () => {
-      // Cleanup opcional
-    };
-  }, [area, examId, startExam, examData]);
-
-  // Resetear loadedRef cuando cambia el examId (para permitir reintentar)
-  useEffect(() => {
-    loadedRef.current = false;
-  }, [examId]);
+  }, [area, examId]); // Sin dependencias inestables
 
   useEffect(() => {
     if (status === 'finished') {
