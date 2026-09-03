@@ -1,12 +1,20 @@
 FROM node:20-alpine AS base
 # Habilita pnpm con corepack (viene incluido en Node 20)
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN corepack enable && corepack prepare pnpm@9.1.0 --activate
 
 FROM base AS deps
 WORKDIR /app
 # Copiar solo los archivos de dependencias para aprovechar cache de capas
 COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
+RUN --mount=type=cache,id=pnpm-backend,target=/root/.local/share/pnpm/store \
+    pnpm install --frozen-lockfile
+
+FROM deps AS development
+WORKDIR /app
+COPY . .
+ENV NODE_ENV=development
+EXPOSE 3001
+CMD ["pnpm", "start:dev"]
 
 FROM base AS builder
 WORKDIR /app

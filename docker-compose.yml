@@ -20,6 +20,8 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+      target: development
+    init: true
     ports:
       - "3001:3001"
     environment:
@@ -46,26 +48,48 @@ services:
       - ./backend/src:/app/src
       - ./backend/tsconfig.json:/app/tsconfig.json
     command: pnpm start:dev
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3001/api/auth/me').then(r=>process.exit(r.status<500?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    command: pnpm dev
+      target: runner
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:3001/api
+        NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+    init: true
     ports:
       - "3000:3000"
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:3001/api
-      - NEXT_PUBLIC_GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
-      - API_URL_INTERNAL=http://backend:3001/api
-      - NODE_ENV=development
-      - WATCHPACK_POLLING=true
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-      - /app/.next
+      - NODE_ENV=production
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3000/dashboard',{headers:{cookie:'token=docker-healthcheck'}}).then(r=>process.exit(r.status<500?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 20s
+      retries: 12
+      start_period: 15s
 
 volumes:
   postgres_data:
+  frontend_next_cache:
