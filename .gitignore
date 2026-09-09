@@ -1,3 +1,4 @@
 .env
 *.tsbuildinfo
 dataset_final.csv
+.atl
