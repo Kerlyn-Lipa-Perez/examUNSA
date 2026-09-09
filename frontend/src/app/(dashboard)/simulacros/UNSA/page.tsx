@@ -1,12 +1,48 @@
 'use client';
 
 import Link from 'next/link';
-import { AREA_CONFIG, ExamArea } from '@/types/simulacro';
-import { UNSA_EXAMS } from '@/data/exams';
+import { useEffect, useState } from 'react';
+import { AREA_CONFIG, ExamArea, ExamMeta } from '@/types/simulacro';
+import { getExamsByArea } from '@/data/exams';
 
 const areas: ExamArea[] = ['biomedicas', 'ingenierias', 'sociales'];
 
 export default function UNSAPage() {
+  const [examsByArea, setExamsByArea] = useState<Record<string, ExamMeta[]>>({});
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadAll() {
+      setLoading(true);
+      const entries = await Promise.all(
+        areas.map(async (area) => [area, await getExamsByArea('UNSA', area)] as const),
+      );
+      if (!cancelled) {
+        setExamsByArea(Object.fromEntries(entries));
+        setLoading(false);
+      }
+    }
+
+    loadAll();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="max-w-5xl mx-auto flex items-center justify-center py-20">
+        <div className="text-center space-y-4">
+          <div className="w-12 h-12 border-4 border-neutral-700 border-t-primary rounded-full animate-spin mx-auto" />
+          <p className="text-gray-400 font-mono text-sm">Cargando áreas...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-5xl mx-auto space-y-8">
       {/* Breadcrumb */}
@@ -30,7 +66,7 @@ export default function UNSAPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {areas.map((area) => {
           const config = AREA_CONFIG[area];
-          const exams = UNSA_EXAMS[area] || [];
+          const exams = examsByArea[area] || [];
 
           return (
             <Link href={`/simulacros/UNSA/${area}`} key={area}>

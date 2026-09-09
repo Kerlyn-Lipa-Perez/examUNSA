@@ -1,56 +1,28 @@
 // frontend/src/data/exams/index.ts
 import { ExamMeta } from '@/types/simulacro';
 
-export const UNSA_EXAMS: Record<string, ExamMeta[]> = {
-  biomedicas: [
-    {
-      id: 'ordinario-i-2026',
-      name: 'Ordinario I Fase 2026',
-      area: 'biomedicas',
-      university: 'UNSA',
-      totalPreguntas: 80,
-      tiempoMinutos: 150,
-      description: 'Examen de admisión ordinario primera fase 2026 - Área Biomédicas',
-      year: 2026,
-      fase: 'I Fase',
-    },
-  ],
-  ingenierias: [
-    {
-      id: 'ordinario-i-2026',
-      name: 'Ordinario I Fase 2026',
-      area: 'ingenierias',
-      university: 'UNSA',
-      totalPreguntas: 80,
-      tiempoMinutos: 150,
-      description: 'Examen de admisión ordinario primera fase 2026 - Área Ingenierías',
-      year: 2026,
-      fase: 'I Fase',
-    },
-  ],
-  sociales: [
-    {
-      id: 'ordinario-i-2026',
-      name: 'Ordinario I Fase 2026',
-      area: 'sociales',
-      university: 'UNSA',
-      totalPreguntas: 80,
-      tiempoMinutos: 150,
-      description: 'Examen de admisión ordinario primera fase 2026 - Área Sociales',
-      year: 2026,
-      fase: 'I Fase',
-    },
-  ],
-};
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 
-export function getExamsByArea(university: string, area: string): ExamMeta[] {
-  if (university === 'UNSA') {
-    return UNSA_EXAMS[area] || [];
+export async function getExamsByArea(university: string, area: string): Promise<ExamMeta[]> {
+  try {
+    const response = await fetch(`${API_URL}/exams/${university}/${area}`);
+
+    if (!response.ok) {
+      return [];
+    }
+
+    return (await response.json()) as ExamMeta[];
+  } catch (error) {
+    console.error(`Error loading exams: ${university}/${area}`, error);
+    return [];
   }
-  return [];
 }
 
-export function getExamMeta(university: string, area: string, examId: string): ExamMeta | undefined {
-  const exams = getExamsByArea(university, area);
+export async function getExamMeta(
+  university: string,
+  area: string,
+  examId: string,
+): Promise<ExamMeta | undefined> {
+  const exams = await getExamsByArea(university, area);
   return exams.find((e) => e.id === examId);
 }

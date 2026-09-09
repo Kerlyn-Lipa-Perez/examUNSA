@@ -2,14 +2,41 @@
 
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { AREA_CONFIG, ExamArea } from '@/types/simulacro';
-import { UNSA_EXAMS } from '@/data/exams';
+import { useEffect, useState } from 'react';
+import { AREA_CONFIG, ExamArea, ExamMeta } from '@/types/simulacro';
+import { getExamsByArea } from '@/data/exams';
 
 export default function AreaExamsPage() {
   const params = useParams();
   const area = params.area as ExamArea;
   const config = AREA_CONFIG[area];
-  const exams = UNSA_EXAMS[area] || [];
+
+  const [exams, setExams] = useState<ExamMeta[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!config) {
+      setLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    async function load() {
+      setLoading(true);
+      const data = await getExamsByArea('UNSA', area);
+      if (!cancelled) {
+        setExams(data);
+        setLoading(false);
+      }
+    }
+
+    load();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [area, config]);
 
   if (!config) {
     return (
@@ -56,7 +83,12 @@ export default function AreaExamsPage() {
       </div>
 
       {/* Exams list */}
-      {exams.length === 0 ? (
+      {loading ? (
+        <div className="bg-neutral-800 rounded-2xl p-12 border border-neutral-border text-center">
+          <div className="w-10 h-10 border-4 border-neutral-700 border-t-primary rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-gray-400">Cargando exámenes...</p>
+        </div>
+      ) : exams.length === 0 ? (
         <div className="bg-neutral-800 rounded-2xl p-12 border border-neutral-border text-center">
           <p className="text-gray-400 text-lg mb-2">No hay exámenes disponibles aún</p>
           <p className="text-gray-600 text-sm">Los exámenes se añadirán próximamente</p>
