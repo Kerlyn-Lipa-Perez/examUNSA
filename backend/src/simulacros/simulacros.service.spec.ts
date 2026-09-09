@@ -3,11 +3,13 @@ import { ForbiddenException } from '@nestjs/common';
 import { SimulacrosService } from './simulacros.service';
 import { DATABASE_CONNECTION } from '../database/database.provider';
 import { AiService } from '../ai/ai.service';
+import { RankingService } from '../ranking/ranking.service';
 
 describe('SimulacrosService', () => {
   let service: SimulacrosService;
   let dbMock: any;
   let aiService: jest.Mocked<AiService>;
+  let rankingService: Pick<RankingService, 'registrarPuntosSimulacro'>;
 
   const mockUserFree = {
     id: 'user-123',
@@ -60,11 +62,19 @@ describe('SimulacrosService', () => {
       ]),
     } as any;
 
+    rankingService = {
+      registrarPuntosSimulacro: jest.fn().mockResolvedValue({
+        total: 10,
+        desglose: [{ accion: 'simulacro', rp: 10 }],
+      }),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         SimulacrosService,
         { provide: DATABASE_CONNECTION, useValue: dbMock },
         { provide: AiService, useValue: aiService },
+        { provide: RankingService, useValue: rankingService },
       ],
     }).compile();
 
@@ -136,8 +146,20 @@ describe('SimulacrosService', () => {
         respuestas: [{ preguntaId: '1', respuesta: 'A', correcta: true }],
       });
 
-      expect(result).toEqual({ guardado: true, puntaje: 15 });
+      expect(result).toEqual({
+        guardado: true,
+        puntaje: 15,
+        ranking: {
+          rpGanados: 10,
+          desglose: [{ accion: 'simulacro', rp: 10 }],
+        },
+      });
       expect(dbMock.insert).toHaveBeenCalled();
+      expect(rankingService.registrarPuntosSimulacro).toHaveBeenCalledWith('user-123', {
+        puntaje: 15,
+        totalPreguntas: 1,
+        simulacrosHoy: 0,
+      });
     });
   });
 

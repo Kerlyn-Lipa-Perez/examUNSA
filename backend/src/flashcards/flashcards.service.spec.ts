@@ -3,12 +3,14 @@ import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { FlashcardsService } from './flashcards.service';
 import { DATABASE_CONNECTION } from '../database/database.provider';
 import { AiService } from '../ai/ai.service';
+import { RankingService } from '../ranking/ranking.service';
 import { Sm2Service } from './sm2.service';
 
 describe('FlashcardsService', () => {
   let service: FlashcardsService;
   let dbMock: any;
   let aiService: jest.Mocked<AiService>;
+  let rankingService: Pick<RankingService, 'registrarPuntosFlashcards'>;
   let sm2Service: Sm2Service;
 
   const mockUserFree = {
@@ -31,7 +33,11 @@ describe('FlashcardsService', () => {
         },
         flashcardProgress: { findFirst: jest.fn() },
       },
-      select: jest.fn().mockReturnThis(),
+      select: jest.fn().mockReturnValue({
+        from: jest.fn().mockReturnValue({
+          where: jest.fn().mockResolvedValue([{ total: 0 }]),
+        }),
+      }),
       from: jest.fn().mockReturnThis(),
       innerJoin: jest.fn().mockReturnThis(),
       where: jest.fn().mockReturnThis(),
@@ -51,12 +57,16 @@ describe('FlashcardsService', () => {
     } as any;
 
     sm2Service = new Sm2Service();
+    rankingService = {
+      registrarPuntosFlashcards: jest.fn().mockResolvedValue(undefined),
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         FlashcardsService,
         { provide: DATABASE_CONNECTION, useValue: dbMock },
         { provide: AiService, useValue: aiService },
+        { provide: RankingService, useValue: rankingService },
         Sm2Service,
       ],
     }).compile();
@@ -125,6 +135,7 @@ describe('FlashcardsService', () => {
       expect(result).toHaveProperty('intervaloDias');
       expect(dbMock.insert).toHaveBeenCalled();
       expect(dbMock.values).toHaveBeenCalled();
+      expect(rankingService.registrarPuntosFlashcards).toHaveBeenCalledWith('user-123', 0);
     });
 
     it('debe actualizar progreso existente con SM-2', async () => {
@@ -145,6 +156,7 @@ describe('FlashcardsService', () => {
 
       expect(result.intervaloDias).toBeGreaterThan(0);
       expect(dbMock.onConflictDoUpdate).toHaveBeenCalled();
+      expect(rankingService.registrarPuntosFlashcards).toHaveBeenCalledWith('user-123', 0);
     });
 
     it('debe lanzar NotFoundException si la flashcard no existe', async () => {

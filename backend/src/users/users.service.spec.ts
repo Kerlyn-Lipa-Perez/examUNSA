@@ -24,6 +24,27 @@ describe('UsersService', () => {
     createdAt: new Date(),
   };
 
+  function mockGetUserStatsQueries(queryResults: unknown[][]) {
+    let queryIndex = 0;
+
+    dbMock.select = jest.fn().mockImplementation(() => {
+      const result = queryResults[queryIndex++] ?? [];
+      const resultPromise = Promise.resolve(result);
+      const whereResult = {
+        orderBy: jest.fn().mockReturnValue({
+          limit: jest.fn().mockResolvedValue(result),
+        }),
+        then: resultPromise.then.bind(resultPromise),
+      };
+
+      return {
+        from: jest.fn().mockReturnValue({
+          where: jest.fn().mockReturnValue(whereResult),
+        }),
+      };
+    });
+  }
+
   beforeEach(async () => {
     dbMock = {
       query: {
@@ -143,9 +164,15 @@ describe('UsersService', () => {
   describe('getUserStats', () => {
     it('debe retornar estadísticas del usuario', async () => {
       dbMock.query.users.findFirst.mockResolvedValue(mockUser);
-      dbMock.query.simulacroResults.findMany.mockResolvedValue([
+      const simulacrosRecientes = [
         { materia: 'matematica', puntaje: 15, totalPreguntas: 20, id: '1', createdAt: new Date() },
         { materia: 'matematica', puntaje: 18, totalPreguntas: 20, id: '2', createdAt: new Date() },
+      ];
+      mockGetUserStatsQueries([
+        simulacrosRecientes,
+        [{ total: 4 }],
+        [{ total: 2 }],
+        [{ total: 18, count: 2 }],
       ]);
 
       const result = await service.getUserStats('user-123');
@@ -157,14 +184,17 @@ describe('UsersService', () => {
       expect(result.diasRacha).toBe(5);
       expect(result).toHaveProperty('progresoPorMateria');
       expect(result).toHaveProperty('ultimosSimulacros');
+      expect(dbMock.select).toHaveBeenCalledTimes(4);
     });
 
     it('debe retornar null si el usuario no existe', async () => {
       dbMock.query.users.findFirst.mockResolvedValue(null);
+      mockGetUserStatsQueries([[], [{ total: 0 }], [{ total: 0 }]]);
 
       const result = await service.getUserStats('no-existe');
 
       expect(result).toBeNull();
+      expect(dbMock.select).toHaveBeenCalledTimes(3);
     });
   });
 
