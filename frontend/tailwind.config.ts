@@ -15,9 +15,9 @@ const config: Config = {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
-        primary: "#D4A017",
+        primary: "rgb(var(--color-primary-rgb) / <alpha-value>)",
         secondary: "#1A3A5C",
-        tertiary: "#3B82F6",
+        tertiary: "rgb(var(--color-info-rgb) / <alpha-value>)",
         neutral: {
           900: "#0D1117", // App background
           800: "#161B22", // Surface
@@ -27,7 +27,7 @@ const config: Config = {
         success: "#10B981",
         warning: "#D4A017",
         error: "#EF4444",
-        info: "#3B82F6",
+        info: "rgb(var(--color-info-rgb) / <alpha-value>)",
       },
     },
   },
