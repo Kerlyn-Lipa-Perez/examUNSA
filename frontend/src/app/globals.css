@@ -5,6 +5,8 @@
 :root {
   --background: #0D1117;
   --foreground: #ffffff;
+  --color-primary-rgb: 212 160 23;
+  --color-info-rgb: 59 130 246;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -57,10 +59,28 @@ body {
 /* Subtle static grid */
 .grid-pattern {
   background-image:
-    linear-gradient(rgba(212, 160, 23, 0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(212, 160, 23, 0.025) 1px, transparent 1px);
+    linear-gradient(rgb(var(--color-primary-rgb) / 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(var(--color-primary-rgb) / 0.025) 1px, transparent 1px);
   background-size: 60px 60px;
 }
+
+/* ─── Landing Hero Decorative Tokens ─────────────────────────────── */
+.hero-ambient-gradient {
+  background-image: radial-gradient(
+    ellipse 80% 60% at 50% 0%,
+    rgb(var(--color-primary-rgb) / 0.06),
+    transparent
+  );
+}
+
+.hero-primary-curve-strong { stroke: rgb(var(--color-primary-rgb) / 0.15); }
+.hero-primary-curve-subtle { stroke: rgb(var(--color-primary-rgb) / 0.1); }
+.hero-info-curve { stroke: rgb(var(--color-info-rgb) / 0.12); }
+.hero-info-curve-subtle { stroke: rgb(var(--color-info-rgb) / 0.1); }
+.hero-primary-node-strong { fill: rgb(var(--color-primary-rgb) / 0.4); }
+.hero-primary-node { fill: rgb(var(--color-primary-rgb) / 0.35); }
+.hero-info-node-strong { fill: rgb(var(--color-info-rgb) / 0.4); }
+.hero-info-node { fill: rgb(var(--color-info-rgb) / 0.35); }
 
 /* ─── Flashcard Flip Animation ──────────────────── */
 .perspective-1000 {

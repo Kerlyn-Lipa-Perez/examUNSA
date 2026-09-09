@@ -58,7 +58,7 @@ export function HeroSection() {
   return (
     <section className="relative min-h-[90vh] flex items-start pt-16 lg:pt-24 lg:pb-32 overflow-hidden">
       {/* Static ambient gradient */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_0%,rgba(212,160,23,0.06),transparent)] pointer-events-none" />
+      <div className="hero-ambient-gradient absolute inset-0 pointer-events-none" />
       {/* Subtle grid */}
       <div className="absolute inset-0 grid-pattern pointer-events-none" />
       {/* Decorative curves + dot-nodes */}
@@ -69,14 +69,14 @@ export function HeroSection() {
         viewBox="0 0 1440 800"
         preserveAspectRatio="none"
       >
-        <path d="M0,120 Q360,40 720,140 T1440,100" fill="none" stroke="rgba(212,160,23,0.15)" strokeWidth="1" />
-        <path d="M0,680 Q400,760 800,660 T1440,700" fill="none" stroke="rgba(59,130,246,0.12)" strokeWidth="1" />
-        <path d="M100,0 Q200,400 120,800" fill="none" stroke="rgba(212,160,23,0.1)" strokeWidth="1" />
-        <path d="M1340,0 Q1240,400 1320,800" fill="none" stroke="rgba(59,130,246,0.1)" strokeWidth="1" />
-        <circle cx="360" cy="60" r="3" fill="rgba(212,160,23,0.4)" />
-        <circle cx="1080" cy="120" r="3" fill="rgba(59,130,246,0.4)" />
-        <circle cx="200" cy="700" r="2.5" fill="rgba(212,160,23,0.35)" />
-        <circle cx="1240" cy="650" r="2.5" fill="rgba(59,130,246,0.35)" />
+        <path className="hero-primary-curve-strong" d="M0,120 Q360,40 720,140 T1440,100" fill="none" strokeWidth="1" />
+        <path className="hero-info-curve" d="M0,680 Q400,760 800,660 T1440,700" fill="none" strokeWidth="1" />
+        <path className="hero-primary-curve-subtle" d="M100,0 Q200,400 120,800" fill="none" strokeWidth="1" />
+        <path className="hero-info-curve-subtle" d="M1340,0 Q1240,400 1320,800" fill="none" strokeWidth="1" />
+        <circle className="hero-primary-node-strong" cx="360" cy="60" r="3" />
+        <circle className="hero-info-node-strong" cx="1080" cy="120" r="3" />
+        <circle className="hero-primary-node" cx="200" cy="700" r="2.5" />
+        <circle className="hero-info-node" cx="1240" cy="650" r="2.5" />
       </svg>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10">

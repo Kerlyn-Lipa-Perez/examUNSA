@@ -66,7 +66,7 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      <main className="pt-19">
+      <main className="pt-16">
         <HeroSection />
 
         {/* ─── Features — Subject Cards ─────────────────────────────── */}
