@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { AiModule } from './ai/ai.module';
 import { SimulacrosModule } from './simulacros/simulacros.module';
+import { ExamsModule } from './exams/exams.module';
 import { FlashcardsModule } from './flashcards/flashcards.module';
 import { PagosModule } from './pagos/pagos.module';
 import { EmailModule } from './email/email.module';
@@ -42,6 +43,7 @@ import { UploadModule } from './upload/upload.module';
     AuthModule,
     AiModule,
     SimulacrosModule,
+    ExamsModule,
     FlashcardsModule,
     PagosModule,
     EmailModule,

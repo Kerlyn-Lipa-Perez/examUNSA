@@ -2,18 +2,16 @@
 
 import Link from 'next/link';
 import { Footer } from '@/components/layout/Footer';
+import { HeroSection } from '@/components/landing/HeroSection';
 import {
   BookOpen,
   BrainCircuit,
   BarChart3,
-  ChevronRight,
   Sparkles,
-  Zap,
   Target,
   Trophy,
   ArrowRight,
   GraduationCap,
-  Clock,
   Check,
   Crown,
   X,
@@ -69,164 +67,7 @@ export default function LandingPage() {
       </nav>
 
       <main className="pt-19">
-        {/* ─── Hero ──────────────────────────────────────────────────── */}
-        <section className="relative min-h-[90vh] flex items-start pt-16 lg:pt-24 overflow-hidden">
-          {/* Static ambient gradient */}
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_0%,rgba(212,160,23,0.06),transparent)] pointer-events-none" />
-          {/* Subtle grid */}
-          <div className="absolute inset-0 grid-pattern pointer-events-none" />
-
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10">
-            <div className="grid lg:grid-cols-2 gap-16 items-center">
-              {/* Left column — Copy */}
-              <div>
-                {/* Badge */}
-                <div className="animate-fade-in-up inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-neutral-800/80 border border-primary/20 text-xs font-bold text-primary mb-8 backdrop-blur-sm">
-                  <Zap className="w-3.5 h-3.5" />
-                  <span>PREPARACIÓN INTELIGENTE PARA UNSA</span>
-                </div>
-
-                <h1 className="animate-fade-in-up delay-100 text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.1] mb-6">
-                  Tu vacante en la{' '}
-                  <span className="relative">
-                    <span className="relative z-10 bg-gradient-to-r from-primary to-yellow-500 bg-clip-text text-transparent">
-                      UNSA
-                    </span>
-                    <span className="absolute bottom-1 left-0 right-0 h-3 bg-primary/15 rounded-sm -z-0" />
-                  </span>{' '}
-                  empieza aquí
-                </h1>
-
-                <p className="animate-fade-in-up delay-200 text-lg text-[#9CA3AF] max-w-lg mb-10 leading-relaxed">
-                  Simulacros adaptativos con IA, flashcards con repaso espaciado y métricas que predicen tu ingreso. El sistema de preparación más avanzado de Arequipa.
-                </p>
-
-                <div className="animate-fade-in-up delay-300 flex flex-col sm:flex-row items-start gap-4">
-                  <Link
-                    href="/registro"
-                    className="group w-full sm:w-auto px-8 py-4 bg-primary text-neutral-900 rounded-xl font-bold text-base flex items-center justify-center gap-3 hover:bg-yellow-600 transition-all shadow-xl shadow-primary/25 hover:shadow-primary/40 hover:-translate-y-0.5"
-                  >
-                    Empezar ahora — es gratis
-                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                  </Link>
-                  <a
-                    href="#simulacros"
-                    className="w-full sm:w-auto px-8 py-4 text-[#9CA3AF] rounded-xl font-semibold text-base flex items-center justify-center gap-2 hover:text-white hover:bg-white/5 transition-all border border-white/5"
-                  >
-                    Cómo funciona
-                    <ChevronRight className="w-4 h-4" />
-                  </a>
-                </div>
-
-                {/* Trust line */}
-                <div className="animate-fade-in-up delay-400 mt-10 flex items-center gap-4 text-sm text-[#8B949E]">
-                  <div className="flex items-center gap-1.5">
-                    <Check className="w-4 h-4 text-success" />
-                    <span>Sin tarjeta de crédito</span>
-                  </div>
-                  <span className="text-neutral-700">·</span>
-                  <div className="flex items-center gap-1.5">
-                    <Check className="w-4 h-4 text-success" />
-                    <span>3 simulacros gratis</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Right column — Mock exam card */}
-              <div className="animate-fade-in-up delay-500 hidden lg:block">
-                <div className="relative">
-                  {/* Floating decorative elements */}
-                  <div className="absolute -top-6 -left-6 w-20 h-20 rounded-2xl bg-success/10 border border-success/20 flex items-center justify-center backdrop-blur-sm">
-                    <Check className="w-8 h-8 text-success" />
-                  </div>
-                  <div className="absolute -bottom-4 -right-4 w-16 h-16 rounded-2xl bg-error/10 border border-error/20 flex items-center justify-center backdrop-blur-sm">
-                    <Clock className="w-7 h-7 text-error" />
-                  </div>
-
-                  {/* Main card — exam preview */}
-                  <div className="bg-neutral-800/90 rounded-2xl border border-white/5 shadow-2xl shadow-black/40 overflow-hidden backdrop-blur-sm">
-                    {/* Card header */}
-                    <div className="flex items-center justify-between px-6 py-4 border-b border-white/5">
-                      <div className="flex items-center gap-3">
-                        <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
-                        <span className="text-sm font-semibold text-white">Simulacro en progreso</span>
-                      </div>
-                      <div className="flex items-center gap-2 px-3 py-1 rounded-md bg-error/10 border border-error/20">
-                        <Clock className="w-3.5 h-3.5 text-error" />
-                        <span className="font-mono text-sm font-bold text-error">24:37</span>
-                      </div>
-                    </div>
-
-                    {/* Question area */}
-                    <div className="p-6">
-                      <div className="flex items-center gap-3 mb-4">
-                        <span className="px-2.5 py-1 rounded-md bg-success/10 text-success text-xs font-bold">BIOLOGÍA</span>
-                        <span className="font-mono text-xs text-[#8B949E]">Pregunta 14 de 20</span>
-                      </div>
-
-                      <p className="font-mono text-sm text-gray-100 leading-relaxed mb-6">
-                        ¿Cuál de los siguientes orgánulos es responsable de la producción de ATP mediante fosforilación oxidativa?
-                      </p>
-
-                      <div className="space-y-2.5">
-                        {[
-                          { label: 'A', text: 'Aparato de Golgi', active: false },
-                          { label: 'B', text: 'Mitocondria', active: true },
-                          { label: 'C', text: 'Ribosoma', active: false },
-                          { label: 'D', text: 'Lisosoma', active: false },
-                        ].map((opt) => (
-                          <div
-                            key={opt.label}
-                            className={`flex items-center gap-3 px-4 py-3 rounded-lg border transition-all ${
-                              opt.active
-                                ? 'border-primary/40 bg-primary/5'
-                                : 'border-white/5 bg-neutral-700/50 hover:border-white/10'
-                            }`}
-                          >
-                            <span className={`w-7 h-7 rounded-md flex items-center justify-center text-xs font-bold ${
-                              opt.active ? 'bg-primary text-neutral-900' : 'bg-neutral-800 text-[#8B949E]'
-                            }`}>
-                              {opt.label}
-                            </span>
-                            <span className="text-sm text-gray-100">{opt.text}</span>
-                          </div>
-                        ))}
-                      </div>
-
-                      {/* Progress bar */}
-                      <div className="mt-6 flex items-center gap-3">
-                        <div className="flex-1 h-1.5 bg-neutral-700 rounded-full overflow-hidden">
-                          <div className="h-full w-[70%] bg-gradient-to-r from-primary to-yellow-400 rounded-full" />
-                        </div>
-                        <span className="font-mono text-xs font-bold text-primary">70%</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* ─── Stats ────────────────────────────────────────────── */}
-            <div className="animate-fade-in-up delay-600 mt-20 lg:mt-28 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-5xl mx-auto">
-              <div className="animate-counter delay-100 text-center py-6 rounded-xl bg-neutral-800/40 border border-white/5 hover:border-primary/20 transition-all group">
-                <div className="font-mono text-3xl sm:text-4xl font-bold text-primary group-hover:scale-110 transition-transform">10K+</div>
-                <div className="text-xs font-medium text-[#8B949E] uppercase tracking-[0.2em] mt-2">Preguntas</div>
-              </div>
-              <div className="animate-counter delay-200 text-center py-6 rounded-xl bg-neutral-800/40 border border-white/5 hover:border-primary/20 transition-all group">
-                <div className="font-mono text-3xl sm:text-4xl font-bold text-info group-hover:scale-110 transition-transform">98.4%</div>
-                <div className="text-xs font-medium text-[#8B949E] uppercase tracking-[0.2em] mt-2">Precisión IA</div>
-              </div>
-              <div className="animate-counter delay-300 text-center py-6 rounded-xl bg-neutral-800/40 border border-white/5 hover:border-primary/20 transition-all group">
-                <div className="font-mono text-3xl sm:text-4xl font-bold text-success group-hover:scale-110 transition-transform">1,200+</div>
-                <div className="text-xs font-medium text-[#8B949E] uppercase tracking-[0.2em] mt-2">Ingresantes</div>
-              </div>
-              <div className="animate-counter delay-400 text-center py-6 rounded-xl bg-neutral-800/40 border border-white/5 hover:border-primary/20 transition-all group">
-                <div className="font-mono text-3xl sm:text-4xl font-bold text-warning group-hover:scale-110 transition-transform">4.9★</div>
-                <div className="text-xs font-medium text-[#8B949E] uppercase tracking-[0.2em] mt-2">Rating</div>
-              </div>
-            </div>
-          </div>
-        </section>
+        <HeroSection />
 
         {/* ─── Features — Subject Cards ─────────────────────────────── */}
         <section className="py-28 relative" id="simulacros">

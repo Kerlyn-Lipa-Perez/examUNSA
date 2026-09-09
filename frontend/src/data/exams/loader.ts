@@ -1,35 +1,27 @@
 // frontend/src/data/exams/loader.ts
-// Carga dinámica de exámenes para evitar bundlear todos los datos en el chunk principal
+// Carga de exámenes desde el backend (banco de preguntas en base de datos).
 
-import { ExamData, ExamArea } from '@/types/simulacro';
+import { ExamData } from '@/types/simulacro';
 
-type ExamLoader = () => Promise<{ default: ExamData }>;
-
-const EXAM_REGISTRY: Record<string, Record<string, Record<string, ExamLoader>>> = {
-  UNSA: {
-    biomedicas: {
-      'ordinario-i-2026': () => import('./unsa/ordinario-i-2026-biomedicas'),
-    },
-    ingenierias: {
-      'ordinario-i-2026': () => import('./unsa/ordinario-i-2026-ingenierias'),
-    },
-    sociales: {
-      'ordinario-i-2026': () => import('./unsa/ordinario-i-2026-sociales'),
-    },
-  },
-};
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 
 export async function loadExam(
   university: string,
   area: string,
   examId: string,
 ): Promise<ExamData | null> {
-  const loader = EXAM_REGISTRY[university]?.[area]?.[examId];
-  if (!loader) return null;
-
   try {
-    const module = await loader();
-    return module.default;
+    const response = await fetch(`${API_URL}/exams/${university}/${area}/${examId}`);
+
+    if (response.status === 404) {
+      return null;
+    }
+
+    if (!response.ok) {
+      throw new Error(`Unexpected status ${response.status}`);
+    }
+
+    return (await response.json()) as ExamData;
   } catch (error) {
     console.error(`Error loading exam: ${university}/${area}/${examId}`, error);
     return null;

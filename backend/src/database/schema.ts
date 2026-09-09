@@ -205,6 +205,33 @@ export const aiAnalysisCacheRelations = relations(aiAnalysisCache, ({ one }) => 
   user: one(users, { fields: [aiAnalysisCache.userId], references: [users.id] }),
 }));
 
+// ─── EXAM QUESTIONS (banco de preguntas UNSA) ─────────────────────────────────
+export const examQuestions = pgTable('exam_questions', {
+  id:                   varchar('id', { length: 150 }).primaryKey(), // CSV slug, natural key
+  area:                 varchar('area', { length: 20 }).notNull(),   // ingenierias|sociales|biomedicas
+  materia:              varchar('materia', { length: 50 }),          // nullable — unresolved gap (100% empty today)
+  pregunta:             text('pregunta').notNull(),
+  alternativaA:         text('alternativa_a'),
+  alternativaB:         text('alternativa_b'),
+  alternativaC:         text('alternativa_c'),
+  alternativaD:         text('alternativa_d'),
+  alternativaE:         text('alternativa_e'),
+  respuestaCorrecta:    varchar('respuesta_correcta', { length: 1 }).notNull(), // A-E
+  universidad:          varchar('universidad', { length: 10 }).default('UNSA').notNull(),
+  tipoExamen:           varchar('tipo_examen', { length: 30 }),
+  anio:                 integer('anio'),
+  fase:                 varchar('fase', { length: 10 }),
+  fuenteUrl:            varchar('fuente_url', { length: 500 }),
+  fuenteArchivo:        varchar('fuente_archivo', { length: 200 }),
+  origenArchivo:        varchar('origen_archivo', { length: 200 }),
+  confianzaExtraccion:  real('confianza_extraccion'),
+  revisadoManual:       boolean('revisado_manual').default(false),
+  figuraPath:           varchar('figura_path', { length: 300 }),
+  createdAt:            timestamp('created_at').defaultNow().notNull(),
+}, (table) => ({
+  areaIdx: index('idx_exam_questions_area').on(table.area),
+}));
+
 // ─── TIPOS INFERIDOS (usar en los servicios en lugar de interfaces manuales) ──
 export type User              = typeof users.$inferSelect;
 export type NewUser           = typeof users.$inferInsert;
@@ -221,3 +248,5 @@ export type RankingLog        = typeof rankingLog.$inferSelect;
 export type NewRankingLog     = typeof rankingLog.$inferInsert;
 export type AiAnalysisCache   = typeof aiAnalysisCache.$inferSelect;
 export type NewAiAnalysisCache = typeof aiAnalysisCache.$inferInsert;
+export type ExamQuestion      = typeof examQuestions.$inferSelect;
+export type NewExamQuestion   = typeof examQuestions.$inferInsert;
