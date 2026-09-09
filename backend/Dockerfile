@@ -1,6 +1,6 @@
 FROM node:20-alpine AS base
 # Habilita pnpm con corepack (viene incluido en Node 20)
-RUN corepack enable && corepack prepare pnpm@9.1.0 --activate
+RUN corepack enable && corepack prepare pnpm@10.33.0 --activate
 
 FROM base AS deps
 WORKDIR /app
